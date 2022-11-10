@@ -46,8 +46,15 @@ for job in range(len(header_line_nums)):
         string_archive = ''.join(whole_archive)
 
         split_archive = string_archive.split("\\")
-
+        
+        split_archive = split_archive[2:]
         for x in split_archive:
             print(x)
+
+        job_type = split_archive[1]
+        functional = split_archive[2]
+        basis_set = split_archive[3]
+        
+
     else:
         continue
