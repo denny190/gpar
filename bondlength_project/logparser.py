@@ -42,7 +42,7 @@ for line in lines:
 
 ### Ad hoc error check 1
 print(bond_list)
-if len(bond_list) = 0:
+if len(bond_list) == 0:
     print("[ERROR] Could not find connectivity information.")
     print("[EOF] EXITING.")
     exit(1)
