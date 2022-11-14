@@ -40,14 +40,20 @@ for line in lines:
             bond_list.append([lines[lines.index(line) + counter][comma_index - 1],lines[lines.index(line) + counter][comma_index + 1]])
             counter += 1
 
+### Ad hoc error check 1
 print(bond_list)
+if len(bond_list) = 0:
+    print("[ERROR] Could not find connectivity information.")
+    print("[EOF] EXITING.")
+    exit(1)
 
-#
+### Ad hoc error check 2
 if (len(archive_header_lines) != len(archive_footer_lines)):
     print(("[ERROR] Number of archive headers and footers is not equal. Please manually check whether logfile %s is written out correctly!") % (file_path))
     print("[EOF] EXITING.")
     exit(1)
 
+print(bond_list)
 ###For each instance of archive entry into the file split each info tab (denomitated by \) into a separate newline
 for job in range(len(archive_header_lines)):
     whole_archive = lines[archive_header_lines[job]:archive_footer_lines[job]]
@@ -64,7 +70,6 @@ for job in range(len(archive_header_lines)):
         split_archive = split_archive[2:]
         for x in split_archive:
             print(x)
-        print(bond_list)
 
         job_type = split_archive[1]
         functional = split_archive[2]
