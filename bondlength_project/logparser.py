@@ -36,9 +36,16 @@ for line in lines:
         counter = 5
 
         while "R(" in lines[lines.index(line) + counter]:
-            comma_index = lines[lines.index(line) + counter].index(",")
-            bond_list.append([lines[lines.index(line) + counter][comma_index - 1],lines[lines.index(line) + counter][comma_index + 1]])
+            bleft_index = lines[lines.index(line) + counter].index("(")
+            bright_index = lines[lines.index(line) + counter].index(")")
+            #comma_index = lines[lines.index(line) + counter].index(",")
+            #bond_list.append([lines[lines.index(line) + counter][comma_index - 1],lines[lines.index(line) + counter][comma_index + 1]])
+            bond_list.append(lines[lines.index(line) + counter][bleft_index + 1 : bright_index])
             counter += 1
+
+# Split each list elem of bond_list to a list of two-integer lists each containing connectivity info. 
+for x in range(len(bond_list)):
+    bond_list[x] = bond_list[x].split(",")
 
 ### Ad hoc error check 1
 print(bond_list)
