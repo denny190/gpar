@@ -34,13 +34,20 @@ for line in lines:
     ###Finds and reads the table containing connectivity parameters
     if btable_string in line:
         counter = 5
+        params_list = []
 
         while "R(" in lines[lines.index(line) + counter]:
-            bleft_index = lines[lines.index(line) + counter].index("(")
-            bright_index = lines[lines.index(line) + counter].index(")")
-            #comma_index = lines[lines.index(line) + counter].index(",")
-            #bond_list.append([lines[lines.index(line) + counter][comma_index - 1],lines[lines.index(line) + counter][comma_index + 1]])
-            bond_list.append(lines[lines.index(line) + counter][bleft_index + 1 : bright_index])
+        
+            params_line = (lines[lines.index(line) + counter].split(" "))
+            params_line = [item.strip(' ') for item in params_line]
+            params_line = [item for item in params_line if item.strip()]
+            
+            params_list.append(params_line)
+
+            bleft_index = params_line[2].index("(")
+            bright_index = params_line[2].index(")")
+
+            bond_list.append(params_line[2][bleft_index + 1 : bright_index] + "," + params_line[3])
             counter += 1
 
 # Split each list elem of bond_list to a list of two-integer lists each containing connectivity info. 
