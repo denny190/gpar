@@ -4,6 +4,25 @@ import os
 import re
 import sys
 
+###############################################################################
+
+def GetBonds():
+    pass
+
+def GetAnglesAndDihedrals():
+    pass
+
+def GetMullikenCharges():
+    pass
+
+def GetArchiveAndCoords():
+    pass
+
+def JobIdentificator():
+    pass
+
+###############################################################################
+
 ###Passed arguments from bondlength.sh
 cwd = os.getcwd()
 file_path = sys.argv[1]
@@ -84,13 +103,6 @@ for job in range(len(archive_header_lines)):
         split_archive = split_archive[2:]
         for x in split_archive:
             print(x)
-
-        job_type = split_archive[1]
-        functional = split_archive[2]
-        basis_set = split_archive[3]
-        
-
-        ###BOND LENGTH CALC: In cartesian space bond length between A and B is defined as r = sqrt{ [x(B) - x(A)]^2 + [y(B) - y(A)]^2 + [z(B) - z(A)]^2 }
 
     else:
         continue
