@@ -45,6 +45,7 @@ do
 	fi
 done
 
+#Takes user input - select jobs to include 
 while :
 do
     error=false
@@ -58,7 +59,6 @@ do
 
     read -a job_input
 
-    ###THIS CURRENTLY DOESNT WORK FOR MULTIPLE SELECTIONS - TODO: FIX
     for i in "${job_input[@]}"
     do
         if [[ $i == 0 ]]
