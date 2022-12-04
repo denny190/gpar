@@ -3,7 +3,9 @@
 import os
 import re
 import sys
+import time
 
+start_time = time.time()
 ###############################################################################
 
 def GetBonds():
@@ -106,3 +108,6 @@ for job in range(len(archive_header_lines)):
 
     else:
         continue
+
+
+print(time.time() - start_time())
