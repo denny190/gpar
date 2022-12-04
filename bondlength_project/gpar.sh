@@ -47,66 +47,66 @@ done
 
 while :
 do
-    echo "[PROMPT] Select job types you wish to include in your search (one or more selections possible, delimited by a comma, ie. '1', or '1,2,3'). Type -1 to exit."
+    error=false
+
+    echo "[PROMPT] Select job types you wish to include in your search (one or more selections possible, delimited by a space, ie. '1', or '1 2 3'). Type -1 to exit."
     echo "[-1] - Exit"
     echo "[0] - All"
     echo "[1] - (Opt) Optimization"
     echo "[2] - (Freq) Frequency"
     echo "[3] - (TD) UV-Vis"
 
-    read job_input
+    read -a job_input
 
     ###THIS CURRENTLY DOESNT WORK FOR MULTIPLE SELECTIONS - TODO: FIX
-    if [ $job_input -eq -1 ]
-    then
-        echo "[EXITING]"
-        exit 0
-    
-    elif ! [[ $job_input =~ ^[0-9]+,[0-9]+,[0-9]+$ ]]
-    then   
-        sel_zero=$(grep -o "0" <<< $job_input | wc -l)
-        sel_one=$(grep -o "1" <<< $job_input | wc -l)
-        sel_two=$(grep -o "2" <<< $job_input | wc -l)
-        sel_three=$(grep -o "3" <<< $job_input | wc -l)
-        
-        if ((sel_zero > 0))
+    for i in "${job_input[@]}"
+    do
+        if [[ $i == 0 ]]
         then
             opt=true 
             freq=true
             td=true
-        elif ((sel_one > 0))
+        elif [[ $i == 1 ]]
         then
             opt=true
-        elif ((sel_two > 0))
-        then 
+        elif [[ $i == 2 ]]
+        then
             freq=true
-            echo "freq is selected"
-        elif ((sel_three > 0))
+        elif [[ $i == 3 ]]
         then
             td=true
-        fi
-
-        if $opt
+        elif [[ $i == -1 ]]
         then
-            echo "[INFO] Opt jobs are selected"
-            echo "opt=true" >> $tmp_dir/runconfig.cfg.tmp
+            echo "[EXITING]"
+            exit 0
+        else
+            echo "[ERROR] '$i' is not a valid selection"
+            error=true
+            continue
         fi
-        if $freq
-        then
-            echo "[INFO] Freq jobs are selected"
-            echo "freq=true" >> $tmp_dir/runconfig.cfg.tmp
-        fi
-        if $td
-        then
-            echo "[INFO] TD jobs are selected"
-            echo "td=true" >> $tmp_dir/runconfig.cfg.tmp
-        fi
+    done
 
-        break
-
-    else
-        echo "[ERROR] Not a valid job selection. Please try again."
+    if $opt
+    then
+        echo "[INFO] Opt jobs are selected"
+        echo "opt=true" >> $tmp_dir/runconfig.cfg.tmp
     fi
+    if $freq
+    then
+        echo "[INFO] Freq jobs are selected"
+        echo "freq=true" >> $tmp_dir/runconfig.cfg.tmp
+    fi
+    if $td
+    then
+        echo "[INFO] TD jobs are selected"
+        echo "td=true" >> $tmp_dir/runconfig.cfg.tmp
+    fi
+
+    if [[ $error == false ]]
+    then
+        break
+    fi
+
 done
 
 ###USER SELECT OF WHAT INFORMATION TO EXTRACT

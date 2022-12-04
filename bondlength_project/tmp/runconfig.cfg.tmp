@@ -1,5 +1,4 @@
 opt=true
-freq=true
 td=true
 ARCHIVE_HEADERS:
 ../logfiles/01_lum_s0_opt.log:12549
