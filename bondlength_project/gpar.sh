@@ -10,7 +10,14 @@ opt=false
 freq=false
 td=false
 
+scf=false
+coords=false
+mulliken=false
+bonds=false
+angles=false
+
 [ ! -e $tmp_dir/runconfig.cfg.tmp ] || rm $tmp_dir/runconfig.cfg.tmp
+[ ! -e $tmp_dir/runconfig.cfg.tmp ] || rm $tmp_dir/selected_job_paths.txt.tmp
 
 # Takes user input. If everything is ok exits loop and continues execution. If not, prompts user again until input correct or user quits
 while :
@@ -53,9 +60,9 @@ do
     echo "[PROMPT] Select job types you wish to include in your search (one or more selections possible, delimited by a space, ie. '1', or '1 2 3'). Type -1 to exit."
     echo "[-1] - Exit"
     echo "[0] - All"
-    echo "[1] - (Opt) Optimization"
-    echo "[2] - (Freq) Frequency"
-    echo "[3] - (TD) UV-Vis"
+    echo "[1] - (opt) Optimization"
+    echo "[2] - (freq=raman) Raman"
+    echo "[3] - (td) UV-Vis"
 
     read -a job_input
 
@@ -111,8 +118,92 @@ done
 
 ###USER SELECT OF WHAT INFORMATION TO EXTRACT
 
+#Takes user input - select jobs to include 
+while :
+do
+    error=false
+
+    echo "[PROMPT] Select what information you wish to print out (one or more selections possible, delimited by a space, ie. '1', or '4 2 3'). Type -1 to exit."
+    echo "[-1] - Exit"
+    echo "[0] - All possible"
+    echo "[1] - SCF energies"
+    echo "[2] - Coordinates"
+    echo "[3] - Bond lengths"
+    echo "[4] - Angles and dihedrals"
+    echo "[5] - Mulliken charges"
+
+    read -a info_input
+
+    for i in "${info_input[@]}"
+    do
+        if [[ $i == 0 ]]
+        then
+            scf=true
+            coords=true
+            bonds=true
+            angles=true
+            mulliken=true
+            dipole=true
+        elif [[ $i == 1 ]]
+        then
+            scf=true
+        elif [[ $i == 2 ]]
+        then
+            coords=true
+        elif [[ $i == 3 ]]
+        then
+            bonds=true
+        elif [[ $i == 4 ]]
+        then
+            angles=true
+        elif [[ $i == 5 ]]
+        then
+            mulliken=true
+        elif [[ $i == -1 ]]
+        then
+            echo "[EXITING]"
+            exit 0
+        else
+            echo "[ERROR] '$i' is not a valid selection"
+            error=true
+            continue
+        fi
+    done
+
+    if $scf
+    then
+        echo "[INFO] SCF energies selected"
+        echo "scf=true" >> $tmp_dir/runconfig.cfg.tmp
+    fi
+    if $coords
+    then
+        echo "[INFO] Coordinates are selected"
+        echo "coords=true" >> $tmp_dir/runconfig.cfg.tmp
+    fi
+    if $bonds
+    then
+        echo "[INFO] Bonds are selected"
+        echo "bonds=true" >> $tmp_dir/runconfig.cfg.tmp
+    fi
+    if $angles
+    then
+        echo "[INFO] Angles and dihedrals are selected"
+        echo "angles=true" >> $tmp_dir/runconfig.cfg.tmp
+    fi
+    if $mulliken
+    then
+        echo "[INFO] Mulliken charges are selected"
+        echo "mulliken=true" >> $tmp_dir/runconfig.cfg.tmp
+    fi
+
+    if [[ $error == false ]]
+    then
+        break
+    fi
+done
 
 ###WRAP THESE IN SOME CONDITIONS FOR SELECTED JOBS AND INFORMATION TYPE
+
 echo "ARCHIVE_HEADERS:"  >> $tmp_dir/runconfig.cfg.tmp
 for f in $(cat $tmp_dir/paths.txt.tmp)
 do
@@ -127,9 +218,32 @@ do
 done
 echo "END!" >> $tmp_dir/runconfig.cfg.tmp
 
-echo "OPT_PARAMS:" >> $tmp_dir/runconfig.cfg.tmp
-for f in $(cat $tmp_dir/paths.txt.tmp)
-do
-    grep -n -F -H "!   Optimized Parameters   !" $f | cut -f1,2 -d: >> $tmp_dir/runconfig.cfg.tmp
-done
-echo "END!" >> $tmp_dir/runconfig.cfg.tmp
+if $coords || $angles
+then
+    echo "OPT_PARAMS:" >> $tmp_dir/runconfig.cfg.tmp
+    for f in $(cat $tmp_dir/paths.txt.tmp)
+    do
+        grep -n -F -H "!   Optimized Parameters   !" $f | cut -f1,2 -d: >> $tmp_dir/runconfig.cfg.tmp
+    done
+    echo "END!" >> $tmp_dir/runconfig.cfg.tmp
+fi
+
+if $scf
+then
+    echo "SCF_DONE:" >> $tmp_dir/runconfig.cfg.tmp
+    for f in $(cat $tmp_dir/paths.txt.tmp)
+    do 
+        grep -n -F -H "SCF Done" $f | cut -f1,2 -d: >> $tmp_dir/runconfig.cfg.tmp
+    done
+    echo "END!" >> $tmp_dir/runconfig.cfg.tmp
+fi
+
+if $mulliken
+then
+    echo "MULLIKEN_CHARGES:" >> $tmp_dir/runconfig.cfg.tmp
+    for f in $(cat $tmp_dir/paths.txt.tmp)
+    do
+        grep -n -F -H "Mulliken charges:" $f | cut -f1,2 -d: >> $tmp_dir/runconfig.cfg.tmp
+    done
+    echo "END!" >> $tmp_dir/runconfig.cfg.tmp
+fi
