@@ -60,10 +60,10 @@ do
     echo "[PROMPT] Select job types you wish to include in your search (one or more selections possible, delimited by a space, ie. '1', or '1 2 3'). Type -1 to exit."
     echo "[-1] - Exit"
     echo "[0] - All"
-    echo "[1] - (opt) Optimization"
-    echo "[2] - (freq=raman) Raman"
-    echo "[3] - (td) UV-Vis"
-    echo "[x] - (reopt) Re-Optimization"
+    echo "[1] - opt"
+    echo "[2] - freq=raman"
+    echo "[3] - td"
+    #echo "[x] - (reopt) Re-Optimization"
 
     read -a job_input
 
@@ -249,4 +249,4 @@ then
 fi
 
 ###run the python script
-#$cwd/pylog.py $tmp_dir/runconfig.cfg.tmp $tmp_dir/selected_job_paths.txt.tmp
+#$cwd/pylog.py $tmp_dir/runconfig.cfg.tmp $tmp_dir/filtered_paths.txt.tmp
