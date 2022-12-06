@@ -63,6 +63,7 @@ do
     echo "[1] - (opt) Optimization"
     echo "[2] - (freq=raman) Raman"
     echo "[3] - (td) UV-Vis"
+    echo "[x] - (reopt) Re-Optimization"
 
     read -a job_input
 
@@ -202,8 +203,7 @@ do
     fi
 done
 
-###WRAP THESE IN SOME CONDITIONS FOR SELECTED JOBS AND INFORMATION TYPE
-
+### Add a filter for selected jobs
 echo "ARCHIVE_HEADERS:"  >> $tmp_dir/runconfig.cfg.tmp
 for f in $(cat $tmp_dir/paths.txt.tmp)
 do
@@ -247,3 +247,6 @@ then
     done
     echo "END!" >> $tmp_dir/runconfig.cfg.tmp
 fi
+
+###run the python script
+#$cwd/pylog.py $tmp_dir/runconfig.cfg.tmp $tmp_dir/selected_job_paths.txt.tmp
