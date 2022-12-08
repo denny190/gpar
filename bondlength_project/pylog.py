@@ -17,9 +17,6 @@ def getConfig(configfile):
     for line in range(index_cfg_header, index_cfg_footer - 1):
         options_array.append(configfile[line])
 
-
-
-
 ###Retrieves options and locations from the config and returns arrays with which the rest of the script works
 getConfig()
 
