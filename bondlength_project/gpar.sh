@@ -203,50 +203,52 @@ do
     fi
 done
 
+
+echo "--OPTIONS_END--"
 ### Add a filter for selected jobs
-echo "ARCHIVE_HEADERS:"  >> $tmp_dir/runconfig.cfg.tmp
+echo "ARCHIVE_HEADERS_START:"  >> $tmp_dir/runconfig.cfg.tmp
 for f in $(cat $tmp_dir/paths.txt.tmp)
 do
     grep -n -F -H "1\1" $f | cut -f1,2 -d: >> $tmp_dir/runconfig.cfg.tmp
 done
-echo "END!" >> $tmp_dir/runconfig.cfg.tmp
+echo "ARCHIVE_HEADERS_END:" >> $tmp_dir/runconfig.cfg.tmp
 
-echo "ARCHIVE_FOOTERS:" >> $tmp_dir/runconfig.cfg.tmp
+echo "ARCHIVE_FOOTERS_START:" >> $tmp_dir/runconfig.cfg.tmp
 for f in $(cat $tmp_dir/paths.txt.tmp)
 do
     grep -n -F -H "\\@" $f | cut -f1,2 -d: >> $tmp_dir/runconfig.cfg.tmp
 done
-echo "END!" >> $tmp_dir/runconfig.cfg.tmp
+echo "ARCHIVE_HEADERS_END:" >> $tmp_dir/runconfig.cfg.tmp
 
 if $coords || $angles
 then
-    echo "OPT_PARAMS:" >> $tmp_dir/runconfig.cfg.tmp
+    echo "OPT_PARAMS_START:" >> $tmp_dir/runconfig.cfg.tmp
     for f in $(cat $tmp_dir/paths.txt.tmp)
     do
         grep -n -F -H "!   Optimized Parameters   !" $f | cut -f1,2 -d: >> $tmp_dir/runconfig.cfg.tmp
     done
-    echo "END!" >> $tmp_dir/runconfig.cfg.tmp
+    echo "OPT_PARAMS_END:" >> $tmp_dir/runconfig.cfg.tmp
 fi
 
 if $scf
 then
-    echo "SCF_DONE:" >> $tmp_dir/runconfig.cfg.tmp
+    echo "SCF_DONE_START:" >> $tmp_dir/runconfig.cfg.tmp
     for f in $(cat $tmp_dir/paths.txt.tmp)
     do 
         grep -n -F -H "SCF Done" $f | cut -f1,2 -d: >> $tmp_dir/runconfig.cfg.tmp
     done
-    echo "END!" >> $tmp_dir/runconfig.cfg.tmp
+    echo "SCF_DONE_END:" >> $tmp_dir/runconfig.cfg.tmp
 fi
 
 if $mulliken
 then
-    echo "MULLIKEN_CHARGES:" >> $tmp_dir/runconfig.cfg.tmp
+    echo "MULLIKEN_CHARGES_START:" >> $tmp_dir/runconfig.cfg.tmp
     for f in $(cat $tmp_dir/paths.txt.tmp)
     do
         grep -n -F -H "Mulliken charges:" $f | cut -f1,2 -d: >> $tmp_dir/runconfig.cfg.tmp
     done
-    echo "END!" >> $tmp_dir/runconfig.cfg.tmp
+    echo "MULLIKEN_CHARGES_END:" >> $tmp_dir/runconfig.cfg.tmp
 fi
 
 ###run the python script
-#$cwd/pylog.py $tmp_dir/runconfig.cfg.tmp $tmp_dir/filtered_paths.txt.tmp
+#$cwd/pylog.py $tmp_dir/runconfig.cfg.tmp $tmp_dir/paths.txt.tmp
