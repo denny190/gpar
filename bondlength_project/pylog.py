@@ -79,6 +79,10 @@ def filterLogs(line_in_pathfile, configfile):
 
     ###Checks presence of requested job in archive for each line in configfile[archive_head_begin:archive_head_end]
     for line in range(archive_head_begin, archive_head_end):
+        
+        ###Boolean that allows to pop filepath from config if it stays false
+        found_match = False
+
         configline = configfile[line].split(":")
         file_path = configline[0]
         archive_head_index = configline[1]
@@ -89,10 +93,23 @@ def filterLogs(line_in_pathfile, configfile):
         if (opt == True):
             if optString in examined_file[archive_head_index]:
                 selected_jobs.append(file_path)
+                found_match = True
 
         elif (freq == True):
             if freqString in examined_file[archive_head_index]:
                 selected_jobs.append(file_path)
+                found_match = True
+
+        elif (td == True):
+            if tdString in examined_file[archive_head_index]:
+                selected_jobs.append(file_path)
+                found_match = True
+        
+        ###Removes the archive header index from config if no match found
+        ###TODO: NEEDS TO REMOVE CORRESPONDING LINE IN ARCHIVE_FOOTERS!
+        if (found_match == False):
+            configfile.pop(line)
+
 
 
 ###Retrieves options and locations from the config and returns arrays with which the rest of the script works
