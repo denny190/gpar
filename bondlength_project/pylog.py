@@ -19,6 +19,10 @@ optString = "FOpt"
 tdString = "TD-DFT" ##Not sure about this
 freqString = "Freq"
 
+###Defining archive indices arrays
+archive_headers_array = []
+archive_footers_array = []
+
 ###Opening file paths that are passed as arguments
 runconfig = open(sys.argv[1], "w")
 
@@ -69,21 +73,28 @@ def getConfig(configfile):
     return options_array
 
 ###Filtering archives by job type
-def filterLogs(line_in_pathfile, configfile):
+def filterLogs(configfile):
 
     selected_jobs = []
+    global archive_headers_array
+    global archive_footers_array
     
-    ###Loads the part of the config file that contains archive header indices and filepaths
+    ###Loads the part of the config file that contains archive header and footer indices and filepaths
     archive_head_begin = configfile.index("ARCHIVE_HEADERS_START:")
     archive_head_end = configfile.index("ARCHIVE_HEADERS_END:") 
+    archive_headers_array = configfile[archive_head_begin:archive_head_end]
 
-    ###Checks presence of requested job in archive for each line in configfile[archive_head_begin:archive_head_end]
-    for line in range(archive_head_begin, archive_head_end):
+    archive_foot_begin = configfile.index("ARCHIVE_FOOTERS_START:") 
+    archive_foot_end = configfile.index("ARCHIVE_FOOTERS_END:")
+    archive_footers_array = configfile[archive_foot_begin:archive_foot_end]
+
+    ###Checks presence of requested job in archive for each line in config header array
+    for line in archive_headers_array:
         
         ###Boolean that allows to pop filepath from config if it stays false
         found_match = False
 
-        configline = configfile[line].split(":")
+        configline = line.split(":")
         file_path = configline[0]
         archive_head_index = configline[1]
 
@@ -105,10 +116,10 @@ def filterLogs(line_in_pathfile, configfile):
                 selected_jobs.append(file_path)
                 found_match = True
         
-        ###Removes the archive header index from config if no match found
-        ###TODO: NEEDS TO REMOVE CORRESPONDING LINE IN ARCHIVE_FOOTERS!
+        ###Removes the archive entry from header array and corresponding index in footer array if no match found
         if (found_match == False):
-            configfile.pop(line)
+            archive_headers_array.pop(line.index())
+            archive_footers_array.pop(line.index())
 
 
 
@@ -116,7 +127,7 @@ def filterLogs(line_in_pathfile, configfile):
 config_array = getConfig(runconfig)
 
 ###Filters logfiles by desired job types
-filterLogs()
+filterLogs(runconfig)
 
 ###Processes retrieved config and discerns what data to retrieve and what data to ignore based on the passed config
 ###Will probably have to pass a variable that specifies what to extract from each individual file in the following extractParams function
