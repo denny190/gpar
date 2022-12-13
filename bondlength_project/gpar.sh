@@ -203,9 +203,8 @@ do
     fi
 done
 
+echo "--OPTIONS_END--" >> $tmp_dir/runconfig.cfg.tmp
 
-echo "--OPTIONS_END--"
-### Add a filter for selected jobs
 echo "ARCHIVE_HEADERS_START:"  >> $tmp_dir/runconfig.cfg.tmp
 for f in $(cat $tmp_dir/paths.txt.tmp)
 do
@@ -251,4 +250,4 @@ then
 fi
 
 ###run the python script
-#$cwd/pylog.py $tmp_dir/runconfig.cfg.tmp $tmp_dir/paths.txt.tmp
+python $cwd/pylog.py $tmp_dir/runconfig.cfg.tmp $tmp_dir/paths.txt.tmp > $cwd/parser_out/debugout.txt

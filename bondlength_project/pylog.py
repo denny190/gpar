@@ -3,6 +3,8 @@ import os
 import re
 import sys
 
+cwd = os.getcwd()
+
 ###Initializing all options and setting them false
 opt=False
 freq=False
@@ -24,10 +26,15 @@ archive_headers_array = []
 archive_footers_array = []
 
 ###Opening file paths that are passed as arguments
-runconfig = open(sys.argv[1], "w")
+path = cwd + "/tmp/runconfig.cfg.tmp"
+runconfig = open(path, 'r')
 
-with open(sys.argv[2]) as f:
-        paths = f
+print(runconfig)
+
+runcfg_arr = []
+for line in runconfig:
+    runcfg_arr.append(line)
+
 
 ###Getting options for current run
 def getConfig(configfile):
@@ -69,7 +76,6 @@ def getConfig(configfile):
         bonds = True
     if "angles" in options_array:
         angles = True
-
     return options_array
 
 ###Filtering archives by job type
@@ -124,17 +130,22 @@ def filterLogs(configfile):
 
 
 ###Retrieves options and locations from the config and returns arrays with which the rest of the script works
-config_array = getConfig(runconfig)
+config_arr = getConfig(runcfg_arr)
 
 ###Filters logfiles by desired job types
-filterLogs(runconfig)
+filterLogs(runcfg_arr)
 
 ###Processes retrieved config and discerns what data to retrieve and what data to ignore based on the passed config
 ###Will probably have to pass a variable that specifies what to extract from each individual file in the following extractParams function
-processData()
+#processData()
 
 ###Extracting parameters that are specified for each logfile individually - will probably be wrapped in a for cycle later on
-extractParams()
+#extractParams()
 
 ###Assembles the collected data in a user-readable csv output.
-assembleOutput()                                
+#assembleOutput()                                
+
+###DEBUGPRINTS
+print(config_arr)
+print(archive_headers_array)
+print(archive_headers_array)
