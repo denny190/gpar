@@ -217,7 +217,7 @@ for f in $(cat $tmp_dir/paths.txt.tmp)
 do
     grep -n -F -H "\\@" $f | cut -f1,2 -d: >> $tmp_dir/runconfig.cfg.tmp
 done
-echo "ARCHIVE_HEADERS_END:" >> $tmp_dir/runconfig.cfg.tmp
+echo "ARCHIVE_FOOTERS_END:" >> $tmp_dir/runconfig.cfg.tmp
 
 if $coords || $angles
 then

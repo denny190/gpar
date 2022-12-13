@@ -33,12 +33,12 @@ print(runconfig)
 
 runcfg_arr = []
 for line in runconfig:
-    runcfg_arr.append(line)
+    runcfg_arr.append(line.strip())
 
 
 ###Getting options for current run
 def getConfig(configfile):
-
+    print(configfile)
     ###Setting option variables as globals so they can be accessed and changed within this function
     global opt
     global freq
@@ -88,11 +88,11 @@ def filterLogs(configfile):
     ###Loads the part of the config file that contains archive header and footer indices and filepaths
     archive_head_begin = configfile.index("ARCHIVE_HEADERS_START:")
     archive_head_end = configfile.index("ARCHIVE_HEADERS_END:") 
-    archive_headers_array = configfile[archive_head_begin:archive_head_end]
+    archive_headers_array = configfile[archive_head_begin + 1 :archive_head_end]
 
-    archive_foot_begin = configfile.index("ARCHIVE_FOOTERS_START:") 
+    archive_foot_begin = configfile.index("ARCHIVE_FOOTERS_START:")
     archive_foot_end = configfile.index("ARCHIVE_FOOTERS_END:")
-    archive_footers_array = configfile[archive_foot_begin:archive_foot_end]
+    archive_footers_array = configfile[archive_foot_begin + 1 :archive_foot_end]
 
     ###Checks presence of requested job in archive for each line in config header array
     for line in archive_headers_array:
