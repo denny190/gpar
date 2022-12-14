@@ -34,7 +34,6 @@ runcfg_arr = []
 for line in runconfig:
     runcfg_arr.append(line.strip())
 
-
 ###Getting options for current run
 def getConfig(configfile):
     ###Setting option variables as globals so they can be accessed and changed within this function
@@ -123,14 +122,23 @@ def filterLogs(configfile):
         if (found_match == False):
             archive_footers_array.pop(archive_headers_array.index(line))
             archive_headers_array.pop(archive_headers_array.index(line))
-            
+    
+    ###Lists unique selected entries from this step, this allows to cherry pick data from config
+    unique_entries = []
+    for elem in archive_headers_array:
+        if elem not in unique_entries:
+            unique_entries.append(elem)
 
+    return unique_entries
+            
+def processData():
+    pass
 
 ###Retrieves options and locations from the config and returns arrays with which the rest of the script works
 config_arr = getConfig(runcfg_arr)
 
 ###Filters logfiles by desired job types
-filterLogs(runcfg_arr)
+selected_paths = filterLogs(runcfg_arr)
 
 ###Processes retrieved config and discerns what data to retrieve and what data to ignore based on the passed config
 ###Will probably have to pass a variable that specifies what to extract from each individual file in the following extractParams function
