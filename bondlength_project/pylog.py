@@ -75,7 +75,8 @@ def getConfig(configfile):
         bonds = True
     if "angles=true" in options_array:
         angles = True
-    return options_array
+
+    return options_array ###CONSIDER REMOVING - RIGHT NOW ONLY DEBUG OUTPUT
 
 ###Filtering archives by job type
 def filterLogs(configfile):
@@ -142,6 +143,3 @@ filterLogs(runcfg_arr)
 #assembleOutput()                                
 
 ###DEBUGPRINTS
-print(config_arr)
-print(archive_headers_array)
-print(archive_headers_array)
