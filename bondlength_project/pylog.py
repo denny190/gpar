@@ -30,8 +30,6 @@ archive_footers_array = []
 path = cwd + "/tmp/runconfig.cfg.tmp"
 runconfig = open(path, 'r')
 
-print(runconfig)
-
 runcfg_arr = []
 for line in runconfig:
     runcfg_arr.append(line.strip())
@@ -39,7 +37,6 @@ for line in runconfig:
 
 ###Getting options for current run
 def getConfig(configfile):
-    print(configfile)
     ###Setting option variables as globals so they can be accessed and changed within this function
     global opt
     global freq
@@ -106,12 +103,8 @@ def filterLogs(configfile):
         file_path = configline[0]
         archive_head_index = configline[1]
 
-        print(line) #DEBUG
-        print(linecache.getline(file_path, archive_head_index)) #DEBUG
-
         if (opt == True):
             if optString in linecache.getline(file_path, archive_head_index):
-                print(linecache.getline(file_path, archive_head_index)) #DEBUG
                 selected_jobs.append(file_path)
                 found_match = True
 
@@ -126,10 +119,9 @@ def filterLogs(configfile):
                 found_match = True
         
         ###Removes the archive entry from header array and corresponding index in footer array if no match found
-        print(line.index()) #DEBUG
         if (found_match == False):
-            archive_headers_array.pop(line.index())
-            archive_footers_array.pop(line.index())
+            archive_footers_array.pop(archive_headers_array.index(line))
+            archive_headers_array.pop(archive_headers_array.index(line))
             
 
 
