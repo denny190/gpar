@@ -2,6 +2,7 @@
 import os
 import re
 import sys
+import linecache
 
 cwd = os.getcwd()
 
@@ -59,22 +60,23 @@ def getConfig(configfile):
         options_array.append(configfile[line])
     
     ###Checks the state of each option (depending on its presence in options array) and changes its global value if its in the configfile
-    if "opt" in options_array:
+    if "opt=true" in options_array:
         opt = True
-    if "freq" in options_array:
+        print("debug: opt is true")
+    if "freq=true" in options_array:
         freq = True
-    if "td" in options_array:
+    if "td=true" in options_array:
         td = True
 
-    if "scf" in options_array:
+    if "scf=true" in options_array:
         scf = True
-    if "coords" in options_array:
+    if "coords=true" in options_array:
         coords = True
-    if "mulliken" in options_array:
+    if "mulliken=true" in options_array:
         mulliken = True
-    if "bonds" in options_array:
+    if "bonds=true" in options_array:
         bonds = True
-    if "angles" in options_array:
+    if "angles=true" in options_array:
         angles = True
     return options_array
 
@@ -104,29 +106,31 @@ def filterLogs(configfile):
         file_path = configline[0]
         archive_head_index = configline[1]
 
-        with open(file_path) as f:
-            examined_file = f
+        print(line) #DEBUG
+        print(linecache.getline(file_path, archive_head_index)) #DEBUG
 
         if (opt == True):
-            if optString in examined_file[archive_head_index]:
+            if optString in linecache.getline(file_path, archive_head_index):
+                print(linecache.getline(file_path, archive_head_index)) #DEBUG
                 selected_jobs.append(file_path)
                 found_match = True
 
         elif (freq == True):
-            if freqString in examined_file[archive_head_index]:
+            if freqString in linecache.getline(file_path, archive_head_index):
                 selected_jobs.append(file_path)
                 found_match = True
 
         elif (td == True):
-            if tdString in examined_file[archive_head_index]:
+            if tdString in linecache.getline(file_path, archive_head_index):
                 selected_jobs.append(file_path)
                 found_match = True
         
         ###Removes the archive entry from header array and corresponding index in footer array if no match found
+        print(line.index()) #DEBUG
         if (found_match == False):
             archive_headers_array.pop(line.index())
             archive_footers_array.pop(line.index())
-
+            
 
 
 ###Retrieves options and locations from the config and returns arrays with which the rest of the script works
