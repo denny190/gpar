@@ -250,4 +250,4 @@ then
 fi
 
 ###run the python script
-python $cwd/pylog.py $tmp_dir/runconfig.cfg.tmp $tmp_dir/paths.txt.tmp > $cwd/parser_out/debugout.txt
+python $cwd/pylog.py > $cwd/parser_out/debugout.txt

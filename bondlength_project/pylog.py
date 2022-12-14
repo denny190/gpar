@@ -58,7 +58,6 @@ def getConfig(configfile):
     ###Checks the state of each option (depending on its presence in options array) and changes its global value if its in the configfile
     if "opt=true" in options_array:
         opt = True
-        print("debug: opt is true")
     if "freq=true" in options_array:
         freq = True
     if "td=true" in options_array:
@@ -130,9 +129,22 @@ def filterLogs(configfile):
             unique_entries.append(elem)
 
     return unique_entries
-            
+
+
+
+def loadParamTables(unique_entries, configfile):
+    
+    opt_param_start = configfile.index("OPT_PARAMS_START:")
+    opt_param_end = configfile.index("OPT_PARAMS_END:")
+    opt_param_array = configfile[opt_param_start + 1: opt_param_end]
+
+    mulliken_param_start = configfile.index("MULLIKEN_CHARGES_START:")
+    mulliken_param_end = configfile.index("MULLIKEN_CHARGES_END:")
+    mulliken_param_array = configfile[mulliken_param_start + 1 : mulliken_param_end]
+
 def processData():
-    pass
+    if (coords == True):
+        pass
 
 ###Retrieves options and locations from the config and returns arrays with which the rest of the script works
 config_arr = getConfig(runcfg_arr)
