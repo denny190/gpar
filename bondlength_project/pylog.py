@@ -130,9 +130,8 @@ def filterLogs(configfile):
 
     return unique_entries
 
-
-
-def loadParamTables(unique_entries, configfile):
+###Loads parameter tables. TODO: NEED TO IMPLEMENT FILTERING - ENTRIES THAT WERE REMOVED IN HEADER ARRAY HAVE TO BE REMOVED HERE AS WELL
+def _loadParamTables(unique_entries, configfile):
     
     opt_param_start = configfile.index("OPT_PARAMS_START:")
     opt_param_end = configfile.index("OPT_PARAMS_END:")
@@ -142,7 +141,12 @@ def loadParamTables(unique_entries, configfile):
     mulliken_param_end = configfile.index("MULLIKEN_CHARGES_END:")
     mulliken_param_array = configfile[mulliken_param_start + 1 : mulliken_param_end]
 
-def processData():
+    return filtered_opt_param_array, filtered_mulliken_param_array
+
+def processData(unique_entries, configfile):
+    
+    opt_param_array, mulliken_param_array = _loadParamTables(unique_entries, configfile)
+
     if (coords == True):
         pass
 
