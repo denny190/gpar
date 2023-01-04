@@ -145,6 +145,8 @@ def processData(configfile):
     for line in opt_param_array:
         
         if (coords == True):
+            opt_parameters = []
+
             linesplit = line.split(":")
             filepath = linesplit[0]
             param_begin = int(linesplit[1])
@@ -154,14 +156,17 @@ def processData(configfile):
                 counter += 1
                 lineno = param_begin + counter
                 temp_line = linecache.getline(filepath, lineno)
-                print(temp_line)
+                opt_parameters.append(temp_line)
+
                 if "--------------------------------------------------------------------------------" in temp_line:
                     param_end = param_begin + counter
                     break
                 
                 if counter > 1000:
-                    print("ERROR Line no. 164")
+                    print("ERROR while loading param array")
+                    opt_parameters = []
                     break
+        
 
 ###Retrieves options and locations from the config and returns arrays with which the rest of the script works
 config_arr = getConfig(runcfg_arr)
