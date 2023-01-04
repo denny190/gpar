@@ -123,15 +123,10 @@ def filterLogs(configfile):
             archive_headers_array.pop(archive_headers_array.index(line))
     
     ###Lists unique selected entries from this step, this allows to cherry pick data from config
-    unique_entries = []
-    for elem in archive_headers_array:
-        if elem not in unique_entries:
-            unique_entries.append(elem)
-
-    return unique_entries
+    #return unique_entries
 
 ###Loads parameter tables. TODO: NEED TO IMPLEMENT FILTERING - ENTRIES THAT WERE REMOVED IN HEADER ARRAY HAVE TO BE REMOVED HERE AS WELL
-def _loadParamTables(unique_entries, configfile):
+def _loadParamTables(configfile):
     
     opt_param_start = configfile.index("OPT_PARAMS_START:")
     opt_param_end = configfile.index("OPT_PARAMS_END:")
@@ -141,14 +136,32 @@ def _loadParamTables(unique_entries, configfile):
     mulliken_param_end = configfile.index("MULLIKEN_CHARGES_END:")
     mulliken_param_array = configfile[mulliken_param_start + 1 : mulliken_param_end]
 
-    return filtered_opt_param_array, filtered_mulliken_param_array
+    return opt_param_array, mulliken_param_array
 
-def processData(unique_entries, configfile):
+def processData(configfile):
     
-    opt_param_array, mulliken_param_array = _loadParamTables(unique_entries, configfile)
+    opt_param_array, mulliken_param_array = _loadParamTables(configfile)
+    
+    for line in opt_param_array:
+        
+        if (coords == True):
+            linesplit = line.split(":")
+            filepath = linesplit[0]
+            param_begin = int(linesplit[1])
 
-    if (coords == True):
-        pass
+            counter = 5
+            while True:
+                counter += 1
+                lineno = param_begin + counter
+                temp_line = linecache.getline(filepath, lineno)
+                print(temp_line)
+                if "--------------------------------------------------------------------------------" in temp_line:
+                    param_end = param_begin + counter
+                    break
+                
+                if counter > 1000:
+                    print("ERROR Line no. 164")
+                    break
 
 ###Retrieves options and locations from the config and returns arrays with which the rest of the script works
 config_arr = getConfig(runcfg_arr)
@@ -158,7 +171,7 @@ selected_paths = filterLogs(runcfg_arr)
 
 ###Processes retrieved config and discerns what data to retrieve and what data to ignore based on the passed config
 ###Will probably have to pass a variable that specifies what to extract from each individual file in the following extractParams function
-#processData()
+processData(runcfg_arr)
 
 ###Extracting parameters that are specified for each logfile individually - will probably be wrapped in a for cycle later on
 #extractParams()
