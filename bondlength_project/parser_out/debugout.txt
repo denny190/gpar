@@ -1,3 +1,23 @@
+DEBUG!!!
+../logfiles/anotherdir/03_lum_s1_td-opt.log
+('1168671', '1168671')
+ 1\1\GINC-ELMO5-15\FOpt\RBP86 TD-FC\CC-pVDZ\C13H12N4O2\BERDARD\02-Aug-2
+
+DEBUG!!!
+../logfiles/03_s1_opt.log
+('1027971', '1027971')
+ 1\1\GINC-GALDOR5\FOpt\ROP86 TD-FC\CC-pVDZ\C13H12N4O2\BERDARD\31-Oct-20
+
+DEBUG!!!
+../logfiles/01_lum_s0_opt.log
+('12573', '12573')
+ 1\1\GINC-ELMO3-1\FOpt\RBP86\CC-pVDZ\C13H12N4O2\BERDARD\01-Aug-2022\0\\
+
+DEBUG!!!
+../logfiles/01_lum_s0_opt.log
+('16658', '16658')
+ 1\1\GINC-ELMO3-1\Freq\RBP86\CC-pVDZ\C13H12N4O2\BERDARD\01-Aug-2022\0\\
+
 ../logfiles/anotherdir/03_lum_s1_td-opt.log
 --------------------------------------------------------------------------------
 ! R1    R(1,2)                  1.4003         -DE/DX =   -0.0001              !

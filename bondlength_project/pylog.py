@@ -82,6 +82,11 @@ def filterLogs(configfile):
     selected_jobs = []
     global archive_headers_array
     global archive_footers_array
+
+    global archive_head_begin
+    global archive_head_end
+    global archive_foot_begin
+    global archive_foot_end
     
     ###Loads the part of the config file that contains archive header and footer indices and filepaths
     archive_head_begin = configfile.index("ARCHIVE_HEADERS_START:")
@@ -121,11 +126,28 @@ def filterLogs(configfile):
         if (found_match == False):
             archive_footers_array.pop(archive_headers_array.index(line))
             archive_headers_array.pop(archive_headers_array.index(line))
-    
-    ###Lists unique selected entries from this step, this allows to cherry pick data from config
-    #return unique_entries
 
-###Loads parameter tables. TODO: NEED TO IMPLEMENT FILTERING - ENTRIES THAT WERE REMOVED IN HEADER ARRAY HAVE TO BE REMOVED HERE AS WELL
+        archive_head_begin = configfile.index("ARCHIVE_HEADERS_START:")
+        archive_head_end = configfile.index("ARCHIVE_HEADERS_END:") 
+        archive_headers_array = configfile[archive_head_begin + 1 :archive_head_end]
+
+        archive_foot_begin = configfile.index("ARCHIVE_FOOTERS_START:")
+        archive_foot_end = configfile.index("ARCHIVE_FOOTERS_END:")
+        archive_footers_array = configfile[archive_foot_begin + 1 :archive_foot_end]
+
+def _getJobInfo(configfile, path_to_file, job_no):
+
+    job_header_entry = ((configfile[archive_head_begin + job_no]).split(":"))[1]
+    job_footer_entry = ((configfile[archive_foot_begin + job_no]).split(":"))[1]
+    print(job_footer_entry, job_footer_entry)
+
+    job_archive = []
+    for x in range(int(job_header_entry), int(job_footer_entry)):
+        job_archive.append(linecache.getline(path_to_file, x))
+    
+    print(job_archive[0])
+
+###Loads parameter tables. TODO: Entries removed in filterLogs() have to be removed as well...
 def _loadParamTables(configfile):
     
     opt_param_start = configfile.index("OPT_PARAMS_START:")
@@ -138,9 +160,16 @@ def _loadParamTables(configfile):
 
     return opt_param_array, mulliken_param_array
 
+###TODO: Using so many counters for iteration is a suboptimal and unreliable solution. I should find a different method.
 def processData(configfile):
     
     opt_param_array, mulliken_param_array = _loadParamTables(configfile)
+
+    counter = 1
+    for line in archive_headers_array:
+        filepath = (line.split(":"))[0]
+        _getJobInfo(configfile, filepath, counter)
+        counter += 1
     
     if (coords == True):
 
