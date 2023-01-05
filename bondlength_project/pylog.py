@@ -152,14 +152,16 @@ def processData(configfile):
             filepath = linesplit[0]
             param_begin = int(linesplit[1])
 
-            counter = 4
+            print(filepath)
+
+            counter = 3
             while True:
                 counter += 1
                 lineno = param_begin + counter
                 temp_line = linecache.getline(filepath, lineno)
                 opt_parameters.append(temp_line)
 
-                if "--------------------------------------------------------------------------------" in temp_line:
+                if "--------------------------------------------------------------------------------" in temp_line and counter > 4:
                     #param_end = lineno
 
                     ###DEBUG PRINTOUT
@@ -176,13 +178,13 @@ def processData(configfile):
         
         for line in mulliken_param_array:
 
-            print("MULLIKEN AFTER:")
-
             mulliken_charges = []
             
             linesplit = line.split(":")
             filepath = linesplit[0]
             mulliken_begin = int(linesplit[1])
+            
+            print(filepath)
 
             counter = -1
             while True:
@@ -193,7 +195,7 @@ def processData(configfile):
 
                 if "Sum of Mulliken charges =" in temp_line:
                     sum_of_mulliken = temp_line
-                    mulliken_charges.pop(0)
+                    mulliken_charges.pop(1)
                     mulliken_charges.pop(counter - 1)
                     #mulliken_end = lineno
 
