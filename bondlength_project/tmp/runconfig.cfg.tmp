@@ -58,11 +58,7 @@ SCF_DONE_START:
 ../logfiles/01_lum_s0_opt.log:13186
 SCF_DONE_END:
 MULLIKEN_CHARGES_START:
-../logfiles/anotherdir/03_lum_s1_td-opt.log:143599
 ../logfiles/anotherdir/03_lum_s1_td-opt.log:1168429
-../logfiles/03_s1_opt.log:149470
 ../logfiles/03_s1_opt.log:1027730
-../logfiles/01_lum_s0_opt.log:1271
-../logfiles/01_lum_s0_opt.log:12470
 ../logfiles/01_lum_s0_opt.log:13620
 MULLIKEN_CHARGES_END:

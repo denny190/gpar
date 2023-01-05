@@ -244,7 +244,7 @@ then
     echo "MULLIKEN_CHARGES_START:" >> $tmp_dir/runconfig.cfg.tmp
     for f in $(cat $tmp_dir/paths.txt.tmp)
     do
-        grep -n -F -H "Mulliken charges:" $f | cut -f1,2 -d: >> $tmp_dir/runconfig.cfg.tmp
+        grep -n -F -H "Mulliken charges:" $f | cut -f1,2 -d: | tail -1 >> $tmp_dir/runconfig.cfg.tmp
     done
     echo "MULLIKEN_CHARGES_END:" >> $tmp_dir/runconfig.cfg.tmp
 fi

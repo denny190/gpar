@@ -52,7 +52,7 @@ def getConfig(configfile):
     index_cfg_header = 0
     index_cfg_footer = configfile.index("--OPTIONS_END--")
 
-    for line in range(index_cfg_header, index_cfg_footer - 1):
+    for line in range(index_cfg_header, index_cfg_footer):
         options_array.append(configfile[line])
     
     ###Checks the state of each option (depending on its presence in options array) and changes its global value if its in the configfile
@@ -152,7 +152,7 @@ def processData(configfile):
             filepath = linesplit[0]
             param_begin = int(linesplit[1])
 
-            counter = 5
+            counter = 4
             while True:
                 counter += 1
                 lineno = param_begin + counter
@@ -160,11 +160,15 @@ def processData(configfile):
                 opt_parameters.append(temp_line)
 
                 if "--------------------------------------------------------------------------------" in temp_line:
-                    param_end = param_begin + counter
+                    #param_end = lineno
+
+                    ###DEBUG PRINTOUT
+                    for elem in opt_parameters:
+                        print(elem.strip())
                     break
                 
                 if counter > 1000:
-                    print("ERROR while loading param array")
+                    print("ERROR while loading param array - Python script")
                     opt_parameters = []
                     break
     
@@ -172,11 +176,36 @@ def processData(configfile):
         
         for line in mulliken_param_array:
 
+            print("MULLIKEN AFTER:")
+
             mulliken_charges = []
             
             linesplit = line.split(":")
             filepath = linesplit[0]
             mulliken_begin = int(linesplit[1])
+
+            counter = -1
+            while True:
+                counter += 1
+                lineno = mulliken_begin + counter
+                temp_line = linecache.getline(filepath, lineno)
+                mulliken_charges.append(temp_line)
+
+                if "Sum of Mulliken charges =" in temp_line:
+                    sum_of_mulliken = temp_line
+                    mulliken_charges.pop(0)
+                    mulliken_charges.pop(counter - 1)
+                    #mulliken_end = lineno
+
+                    ###DEBUG PRINTOUT
+                    for elem in mulliken_charges:
+                        print(elem.strip())
+
+                    break
+
+                if counter > 1000:
+                    print("ERROR while loading mulliken charges - Python script")
+                    break
     
         
 
