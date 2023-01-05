@@ -142,9 +142,10 @@ def processData(configfile):
     
     opt_param_array, mulliken_param_array = _loadParamTables(configfile)
     
-    for line in opt_param_array:
+    if (coords == True):
+
+        for line in opt_param_array:
         
-        if (coords == True):
             opt_parameters = []
 
             linesplit = line.split(":")
@@ -166,6 +167,17 @@ def processData(configfile):
                     print("ERROR while loading param array")
                     opt_parameters = []
                     break
+    
+    if (mulliken == True):
+        
+        for line in mulliken_param_array:
+
+            mulliken_charges = []
+            
+            linesplit = line.split(":")
+            filepath = linesplit[0]
+            mulliken_begin = int(linesplit[1])
+    
         
 
 ###Retrieves options and locations from the config and returns arrays with which the rest of the script works
