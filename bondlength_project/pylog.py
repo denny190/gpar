@@ -268,6 +268,9 @@ def processData(configfile):
     
                 counter += 1
 
+def assembleOutput():
+    pass
+
 
 # Retrieves options and locations from the config and returns arrays with which the rest of the script works
 config_arr = getConfig(runcfg_arr)
@@ -278,9 +281,6 @@ selected_paths = filterLogs(runcfg_arr)
 # Processes retrieved config and discerns what data to retrieve and what data to ignore based on the passed config
 # Will probably have to pass a variable that specifies what to extract from each individual file in the following extractParams function
 processData(runcfg_arr)
-
-# Extracting parameters that are specified for each logfile individually - will probably be wrapped in a for cycle later on
-# extractParams()
 
 # Assembles the collected data in a user-readable csv output.
 # assembleOutput()
