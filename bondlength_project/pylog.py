@@ -154,7 +154,16 @@ def _getJobInfo(configfile, path_to_file, job_no):
     for x in range(int(job_header_entry), int(job_footer_entry)):
         job_archive.append(linecache.getline(path_to_file, x))
 
-    print(job_archive[0])
+    # Cleaning the archive entries into a readable form
+    stripped_archive = [item.strip() for item in job_archive]
+    clean_archive = ''.join(stripped_archive)
+    split_archive = clean_archive.split("\\")
+    split_archive = split_archive[2:]
+
+    # DEBUG PRINTOUT
+    print(split_archive)
+
+    return split_archive
 
 # Loads parameter tables. TODO: Entries removed in filterLogs() have to be removed as well...
 
@@ -182,7 +191,7 @@ def processData(configfile):
     counter = 1
     for line in archive_headers_array:
         filepath = (line.split(":"))[0]
-        _getJobInfo(configfile, filepath, counter)
+        archive = _getJobInfo(configfile, filepath, counter)
         counter += 1
 
     if (coords == True):
