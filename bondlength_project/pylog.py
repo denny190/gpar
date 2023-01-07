@@ -192,19 +192,23 @@ def processData(configfile):
         archive = _cleanArchiveForJob(configfile, counter)
         counter += 1
 
-    # 
+    # If flag coords is true then run the pipeline to extract coordinate info from the Optimized Parameters table
     if (coords == True):
         
         for line in opt_param_array:
 
             opt_parameters = []
 
+            # Get job path and lineno of the table in the logfile
             linesplit = line.split(":")
             filepath = linesplit[0]
             param_begin = int(linesplit[1])
 
+            # DEBUG PRINTOUT
             print(filepath)
 
+            # Use linecache to access the opt_param table until the end of table is encounetered
+            # Counter is set to 4 to skip the header and counter needs to be larger >4 to skip the --- denominator at the beggining of the table
             counter = 4
             while True:
                 lineno = param_begin + counter
@@ -218,14 +222,16 @@ def processData(configfile):
                     for elem in opt_parameters:
                         print(elem.strip())
                     break
-
+                
+                # WIP error statement
                 if counter > 1000:
                     print("ERROR while loading param array - Python script")
                     opt_parameters = []
                     break
 
                 counter += 1
-                
+    
+    # If flag mulliken is true extract mulliken charges from file
     if (mulliken == True):
 
         for line in mulliken_param_array:
