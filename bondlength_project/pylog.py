@@ -133,23 +133,24 @@ def filterLogs(configfile):
 
         archive_head_begin = configfile.index("ARCHIVE_HEADERS_START:")
         archive_head_end = configfile.index("ARCHIVE_HEADERS_END:")
-        archive_headers_array = configfile[archive_head_begin +
-                                           1:archive_head_end]
+        archive_headers_array = configfile[archive_head_begin +1:archive_head_end]
 
         archive_foot_begin = configfile.index("ARCHIVE_FOOTERS_START:")
         archive_foot_end = configfile.index("ARCHIVE_FOOTERS_END:")
-        archive_footers_array = configfile[archive_foot_begin +
-                                           1:archive_foot_end]
+        archive_footers_array = configfile[archive_foot_begin +1:archive_foot_end]
 
+# For each job inputted it finds the appropriate archive file, via the lineno specified in the config and cleans up the archive into a readable array
+def _cleanArchiveForJob(configfile, job_no):
 
-def _getJobInfo(configfile, path_to_file, job_no):
+    # Loading start and end of archive for the specified job from the logfile so the archive can be accessed directly with linecache.
+    job_header_entry = ((configfile[archive_head_begin + job_no]).split(":"))[1]
+    job_footer_entry = ((configfile[archive_foot_begin + job_no]).split(":"))[1]
+    path_to_file = ((configfile[archive_head_begin + job_no]).split(":"))[0]
 
-    job_header_entry = (
-        (configfile[archive_head_begin + job_no]).split(":"))[1]
-    job_footer_entry = (
-        (configfile[archive_foot_begin + job_no]).split(":"))[1]
+    # DEBUG PRINTOUT
     print(job_footer_entry, job_footer_entry)
 
+    # Acessing the logfile and loading lines within the range corresponding to the archive file
     job_archive = []
     for x in range(int(job_header_entry), int(job_footer_entry)):
         job_archive.append(linecache.getline(path_to_file, x))
@@ -165,9 +166,7 @@ def _getJobInfo(configfile, path_to_file, job_no):
 
     return split_archive
 
-# Loads parameter tables. TODO: Entries removed in filterLogs() have to be removed as well...
-
-
+# Loads tables from config. TODO: Entries removed in filterLogs() have to be removed as well...
 def _loadParamTables(configfile):
 
     opt_param_start = configfile.index("OPT_PARAMS_START:")
@@ -176,26 +175,26 @@ def _loadParamTables(configfile):
 
     mulliken_param_start = configfile.index("MULLIKEN_CHARGES_START:")
     mulliken_param_end = configfile.index("MULLIKEN_CHARGES_END:")
-    mulliken_param_array = configfile[mulliken_param_start +
-                                      1: mulliken_param_end]
+    mulliken_param_array = configfile[mulliken_param_start + 1: mulliken_param_end]
 
     return opt_param_array, mulliken_param_array
 
 # TODO: Using so many counters for iteration is a suboptimal and unreliable solution. I should find a different method.
-
-
 def processData(configfile):
 
+    # Loading linenos of appropriate parameter tables
     opt_param_array, mulliken_param_array = _loadParamTables(configfile)
 
+    # For each job (iterated through via counter), access their archive (with linenos from configfile) 
     counter = 1
     for line in archive_headers_array:
         filepath = (line.split(":"))[0]
-        archive = _getJobInfo(configfile, filepath, counter)
+        archive = _cleanArchiveForJob(configfile, counter)
         counter += 1
 
+    # 
     if (coords == True):
-
+        
         for line in opt_param_array:
 
             opt_parameters = []
@@ -206,9 +205,8 @@ def processData(configfile):
 
             print(filepath)
 
-            counter = 3
+            counter = 4
             while True:
-                counter += 1
                 lineno = param_begin + counter
                 temp_line = linecache.getline(filepath, lineno)
                 opt_parameters.append(temp_line)
@@ -226,6 +224,8 @@ def processData(configfile):
                     opt_parameters = []
                     break
 
+                counter += 1
+                
     if (mulliken == True):
 
         for line in mulliken_param_array:
@@ -238,9 +238,8 @@ def processData(configfile):
 
             print(filepath)
 
-            counter = -1
+            counter = 0
             while True:
-                counter += 1
                 lineno = mulliken_begin + counter
                 temp_line = linecache.getline(filepath, lineno)
                 mulliken_charges.append(temp_line)
@@ -260,6 +259,8 @@ def processData(configfile):
                 if counter > 1000:
                     print("ERROR while loading mulliken charges - Python script")
                     break
+    
+                counter += 1
 
 
 # Retrieves options and locations from the config and returns arrays with which the rest of the script works
