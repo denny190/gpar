@@ -3,6 +3,7 @@ import os
 import re
 import sys
 import linecache
+import csv
 
 cwd = os.getcwd()
 
@@ -195,6 +196,8 @@ def processData(configfile):
     # If flag coords is true then run the pipeline to extract coordinate info from the Optimized Parameters table
     if (coords == True):
         
+        all_params = []
+
         for line in opt_param_array:
 
             opt_parameters = []
@@ -203,9 +206,6 @@ def processData(configfile):
             linesplit = line.split(":")
             filepath = linesplit[0]
             param_begin = int(linesplit[1])
-
-            # DEBUG PRINTOUT
-            print(filepath)
 
             # Use linecache to access the opt_param table until the end of table is encounetered
             # Counter is set to 4 to skip the header and counter needs to be larger >4 to skip the --- denominator at the beggining of the table
@@ -217,10 +217,6 @@ def processData(configfile):
 
                 if "--------------------------------------------------------------------------------" in temp_line and counter > 4:
                     # param_end = lineno
-
-                    # DEBUG PRINTOUT
-                    for elem in opt_parameters:
-                        print(elem.strip())
                     break
                 
                 # WIP error statement
@@ -230,9 +226,14 @@ def processData(configfile):
                     break
 
                 counter += 1
+            
+            all_params.append(opt_parameters)
+            print(all_params)
     
     # If flag mulliken is true extract mulliken charges from file
     if (mulliken == True):
+
+        all_mullikens = []
 
         for line in mulliken_param_array:
 
@@ -241,8 +242,6 @@ def processData(configfile):
             linesplit = line.split(":")
             filepath = linesplit[0]
             mulliken_begin = int(linesplit[1])
-
-            print(filepath)
 
             counter = 0
             while True:
@@ -255,11 +254,6 @@ def processData(configfile):
                     mulliken_charges.pop(1)
                     mulliken_charges.pop(counter - 1)
                     # mulliken_end = lineno
-
-                    # DEBUG PRINTOUT
-                    for elem in mulliken_charges:
-                        print(elem.strip())
-
                     break
 
                 if counter > 1000:
@@ -267,9 +261,26 @@ def processData(configfile):
                     break
     
                 counter += 1
+            
+            all_mullikens.append(mulliken_charges)
+            print(all_mullikens)
+    
+    return all_params, all_mullikens
 
-def assembleOutput():
-    pass
+def assembleOutput(para, mull):
+
+    filename = "output"
+
+    with open("parser_out/" + filename + ".csv", "w") as out_file:
+        writer = csv.writer(out_file)
+    
+        if (mulliken == True):
+            #writer.writerow(["Mulliken Charges:"])
+            
+            for array in mull:
+                for elem in array:
+                    writer.writerow([elem.strip()])
+
 
 
 # Retrieves options and locations from the config and returns arrays with which the rest of the script works
@@ -280,9 +291,9 @@ selected_paths = filterLogs(runcfg_arr)
 
 # Processes retrieved config and discerns what data to retrieve and what data to ignore based on the passed config
 # Will probably have to pass a variable that specifies what to extract from each individual file in the following extractParams function
-processData(runcfg_arr)
+all_param_array, all_mulliken_array = processData(runcfg_arr)
 
 # Assembles the collected data in a user-readable csv output.
-# assembleOutput()
+assembleOutput(all_param_array, all_mulliken_array)
 
 # DEBUGPRINTS
