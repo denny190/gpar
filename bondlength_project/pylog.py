@@ -270,16 +270,18 @@ def processData(configfile):
 def assembleOutput(para, mull):
 
     filename = "output"
-
+    fieldnames = ["Mulliken Charges", "Coordinates", ""]
+    
     with open("parser_out/" + filename + ".csv", "w") as out_file:
         writer = csv.writer(out_file)
-    
+
         if (mulliken == True):
             #writer.writerow(["Mulliken Charges:"])
-            
-            for array in mull:
-                for elem in array:
-                    writer.writerow([elem.strip()])
+            pass
+            #for array in mull:
+                #for elem in array:
+                    #writer.writerow([elem.strip()])
+
 
 
 
