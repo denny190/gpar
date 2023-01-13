@@ -7,6 +7,9 @@ import csv
 
 cwd = os.getcwd()
 
+### TODO: NEED TO IMPLEMENT JOB NUMBERING TO KEEP TRACK OF VARIOUS ARRAYS THAT I NEED TO STITCH TOGETHER IN THE NED
+### JOB NUMBERING WILL LIKELY HAVE SEPARATE TABLES FOR EACH TYPE OF INFO DUE TO VARYING AMOUNT OF ENTRIES PER JOB
+
 # Initializing all options and setting them false
 opt = False
 freq = False
@@ -134,18 +137,24 @@ def filterLogs(configfile):
 
         archive_head_begin = configfile.index("ARCHIVE_HEADERS_START:")
         archive_head_end = configfile.index("ARCHIVE_HEADERS_END:")
-        archive_headers_array = configfile[archive_head_begin +1:archive_head_end]
+        archive_headers_array = configfile[archive_head_begin +
+                                           1:archive_head_end]
 
         archive_foot_begin = configfile.index("ARCHIVE_FOOTERS_START:")
         archive_foot_end = configfile.index("ARCHIVE_FOOTERS_END:")
-        archive_footers_array = configfile[archive_foot_begin +1:archive_foot_end]
+        archive_footers_array = configfile[archive_foot_begin +
+                                           1:archive_foot_end]
 
 # For each job inputted it finds the appropriate archive file, via the lineno specified in the config and cleans up the archive into a readable array
+
+
 def _cleanArchiveForJob(configfile, job_no):
 
     # Loading start and end of archive for the specified job from the logfile so the archive can be accessed directly with linecache.
-    job_header_entry = ((configfile[archive_head_begin + job_no]).split(":"))[1]
-    job_footer_entry = ((configfile[archive_foot_begin + job_no]).split(":"))[1]
+    job_header_entry = (
+        (configfile[archive_head_begin + job_no]).split(":"))[1]
+    job_footer_entry = (
+        (configfile[archive_foot_begin + job_no]).split(":"))[1]
     path_to_file = ((configfile[archive_head_begin + job_no]).split(":"))[0]
 
     # DEBUG PRINTOUT
@@ -168,6 +177,8 @@ def _cleanArchiveForJob(configfile, job_no):
     return split_archive
 
 # Loads tables from config. TODO: Entries removed in filterLogs() have to be removed as well...
+
+
 def _loadParamTables(configfile):
 
     opt_param_start = configfile.index("OPT_PARAMS_START:")
@@ -176,17 +187,20 @@ def _loadParamTables(configfile):
 
     mulliken_param_start = configfile.index("MULLIKEN_CHARGES_START:")
     mulliken_param_end = configfile.index("MULLIKEN_CHARGES_END:")
-    mulliken_param_array = configfile[mulliken_param_start + 1: mulliken_param_end]
+    mulliken_param_array = configfile[mulliken_param_start +
+                                      1: mulliken_param_end]
 
     return opt_param_array, mulliken_param_array
 
 # TODO: Using so many counters for iteration is a suboptimal and unreliable solution. I should find a different method.
+
+
 def processData(configfile):
 
     # Loading linenos of appropriate parameter tables
     opt_param_array, mulliken_param_array = _loadParamTables(configfile)
 
-    # For each job (iterated through via counter), access their archive (with linenos from configfile) 
+    # For each job (iterated through via counter), access their archive (with linenos from configfile)
     counter = 1
     for line in archive_headers_array:
         filepath = (line.split(":"))[0]
@@ -195,7 +209,7 @@ def processData(configfile):
 
     # If flag coords is true then run the pipeline to extract coordinate info from the Optimized Parameters table
     if (bonds == True) or (angles == True) or (dihedrals == True):
-        
+
         all_params = []
 
         for line in opt_param_array:
@@ -218,7 +232,7 @@ def processData(configfile):
                 if "--------------------------------------------------------------------------------" in temp_line and counter > 4:
                     # param_end = lineno
                     break
-                
+
                 # WIP error statement
                 if counter > 1000:
                     print("ERROR while loading param array - Python script")
@@ -226,10 +240,40 @@ def processData(configfile):
                     break
 
                 counter += 1
-            
-            
 
             all_params.append(opt_parameters)
+
+        # Getting indices of R, A and D entries in the param table
+        index_R = []
+        index_A = []
+        index_D = []
+        for line in all_params[job_no]:
+            counter = 0
+            while True:
+                if "R(" not in all_params[job_no][counter]:
+                    index_R[job_no] = counter
+                    counter += 1
+                else:
+                    index_R[job_no] = counter + 1
+                    break
+
+            counter = 0
+            while True:
+                if "A(" not in all_params[job_no][counter]:
+                    index_A[job_no] = counter
+                    counter += 1
+                else:
+                    index_A[job_no] = counter + 1
+                    break
+
+            counter = 0
+            while True:
+                if "D(" not in all_params[job_no][counter]:
+                    index_D[job_no] = counter
+                    counter += 1
+                else:
+                    index_D[job_no] = counter + 1
+                    break
 
         if (bonds == True):
             bond_list = []
@@ -244,7 +288,8 @@ def processData(configfile):
                 bleft_index = params_line[2].index("(")
                 bright_index = params_line[2].index(")")
 
-                bond_list.append(params_line[2][bleft_index + 1 : bright_index] + "," + params_line[3])
+                bond_list.append(
+                    params_line[2][bleft_index + 1: bright_index] + "," + params_line[3])
                 counter += 1
 
     # If flag mulliken is true extract mulliken charges from file
@@ -276,19 +321,20 @@ def processData(configfile):
                 if counter > 1000:
                     print("ERROR while loading mulliken charges - Python script")
                     break
-    
+
                 counter += 1
-            
+
             all_mullikens.append(mulliken_charges)
             print(all_mullikens)
-    
+
     return all_params, all_mullikens
+
 
 def assembleOutput(para, mull):
 
     fields = []
     rows = []
-    
+
     for job in job_range:
         if (coords == True):
             fields.append("Coords")
@@ -305,9 +351,6 @@ def assembleOutput(para, mull):
         if (mulliken == True):
             fields.appends("Mulliken")
             rows.append(mull[job])
-
-    
-
 
 
 # Retrieves options and locations from the config and returns arrays with which the rest of the script works
