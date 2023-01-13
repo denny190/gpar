@@ -194,7 +194,7 @@ def processData(configfile):
         counter += 1
 
     # If flag coords is true then run the pipeline to extract coordinate info from the Optimized Parameters table
-    if (coords == True):
+    if (bonds == True) or (angles == True) or (dihedrals == True):
         
         all_params = []
 
@@ -207,7 +207,7 @@ def processData(configfile):
             filepath = linesplit[0]
             param_begin = int(linesplit[1])
 
-            # Use linecache to access the opt_param table until the end of table is encounetered
+            # Use linecache to access the opt_param tabl            print(all_params)e until the end of table is encounetered
             # Counter is set to 4 to skip the header and counter needs to be larger >4 to skip the --- denominator at the beggining of the table
             counter = 4
             while True:
@@ -227,9 +227,26 @@ def processData(configfile):
 
                 counter += 1
             
+            
+
             all_params.append(opt_parameters)
-            print(all_params)
-    
+
+        if (bonds == True):
+            bond_list = []
+            params_list = []
+            counter = 1
+            while "R(" in all_params[counter]:
+                params_line = (lines[lines.index(line) + counter].split(" "))
+                params_line = [item.strip(' ') for item in params_line]
+                params_line = [item for item in params_line if item.strip()]
+
+                params_list.append(params_line)
+                bleft_index = params_line[2].index("(")
+                bright_index = params_line[2].index(")")
+
+                bond_list.append(params_line[2][bleft_index + 1 : bright_index] + "," + params_line[3])
+                counter += 1
+
     # If flag mulliken is true extract mulliken charges from file
     if (mulliken == True):
 
@@ -269,19 +286,27 @@ def processData(configfile):
 
 def assembleOutput(para, mull):
 
-    filename = "output"
-    fieldnames = ["Mulliken Charges", "Coordinates", ""]
+    fields = []
+    rows = []
     
-    with open("parser_out/" + filename + ".csv", "w") as out_file:
-        writer = csv.writer(out_file)
+    for job in job_range:
+        if (coords == True):
+            fields.append("Coords")
+            rows.append(job_coords[job])
+
+        if (bonds == True):
+            fields.append("Bonds")
+            rows.append(job_bonds[job])
+
+        if (angles == True):
+            fields.append("Angles")
+            rows.append(job_angles[job])
 
         if (mulliken == True):
-            #writer.writerow(["Mulliken Charges:"])
-            pass
-            #for array in mull:
-                #for elem in array:
-                    #writer.writerow([elem.strip()])
+            fields.appends("Mulliken")
+            rows.append(mull[job])
 
+    
 
 
 
