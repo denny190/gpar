@@ -344,7 +344,6 @@ def assembleOutput(para, mull):
                 str_to_write = concat_mull[0]
                 for x in range(1, jobno):
                     str_to_write = str_to_write + "," + str(concat_mull[x])
-                    print(str_to_write)
                 output.write(str_to_write + ",\n") 
                 concat_mull = concat_mull[jobno:]
             else:
