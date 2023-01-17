@@ -335,8 +335,14 @@ def assembleOutput(para, mull):
     for x in range(len(mull[0])):
         for y in range(len(mull)):
             concat_mull.append(mull[y][x])
+
+    concat_para = []
+    for x in range(len(para[0])):
+        for y in range(len(para)):
+            concat_para.append(para[y][x])
     
-    ### IMPLEMENT JOB NO TRACKER
+    ### TODO: IMPLEMENT JOB NO TRACKER
+    ### TODO: IMPLEMENT FUNCTION THAT CLEANS UP PARAM ARRAY
     jobno = 3
     with open("parser_out/output.csv", 'w') as output:
         while True:
