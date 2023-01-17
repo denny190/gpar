@@ -3,7 +3,6 @@ import os
 import re
 import sys
 import linecache
-import csv
 
 cwd = os.getcwd()
 
@@ -350,26 +349,6 @@ def assembleOutput(para, mull):
                 concat_mull = concat_mull[jobno:]
             else:
                 break
-
-    # fields = []
-    # rows = []
-    # for job in job_range:
-    #     if (coords == True):
-    #         fields.append("Coords")
-    #         rows.append(job_coords[job])
-
-    #     if (bonds == True):
-    #         fields.append("Bonds")
-    #         rows.append(job_bonds[job])
-
-    #     if (angles == True):
-    #         fields.append("Angles")
-    #         rows.append(job_angles[job])
-
-    #     if (mulliken == True):
-    #         fields.appends("Mulliken")
-    #         rows.append(mull[job])
-
 
 # Retrieves options and locations from the config and returns arrays with which the rest of the script works
 config_arr = getConfig(runcfg_arr)
