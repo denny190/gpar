@@ -324,8 +324,8 @@ def processData(configfile):
 
                 counter += 1
 
+            mulliken_charges = [item.strip() for item in mulliken_charges]
             all_mullikens.append(mulliken_charges)
-            print(all_mullikens)
 
     return all_params, all_mullikens
 
@@ -337,11 +337,19 @@ def assembleOutput(para, mull):
         for y in range(len(mull)):
             concat_mull.append(mull[y][x])
     
+    ### IMPLEMENT JOB NO TRACKER
+    jobno = 3
     with open("parser_out/output.csv", 'w') as output:
-        writer = csv.writer(output)
-
-        for row in concat_mull:
-            writer.writerow(row)
+        while True:
+            if len(concat_mull) > 0:
+                str_to_write = concat_mull[0]
+                for x in range(1, jobno):
+                    str_to_write = str_to_write + "," + str(concat_mull[x])
+                    print(str_to_write)
+                output.write(str_to_write + ",\n") 
+                concat_mull = concat_mull[jobno:]
+            else:
+                break
 
     # fields = []
     # rows = []
