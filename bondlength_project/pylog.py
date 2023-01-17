@@ -244,53 +244,53 @@ def processData(configfile):
             all_params.append(opt_parameters)
 
         # Getting indices of R, A and D entries in the param table
-        index_R = []
-        index_A = []
-        index_D = []
-        for line in all_params[job_no]:
-            counter = 0
-            while True:
-                if "R(" not in all_params[job_no][counter]:
-                    index_R[job_no] = counter
-                    counter += 1
-                else:
-                    index_R[job_no] = counter + 1
-                    break
+        # index_R = []
+        # index_A = []
+        # index_D = []
+        # for line in all_params[job_no]:
+        #     counter = 0
+        #     while True:
+        #         if "R(" not in all_params[job_no][counter]:
+        #             index_R[job_no] = counter
+        #             counter += 1
+        #         else:
+        #             index_R[job_no] = counter + 1
+        #             break
 
-            counter = 0
-            while True:
-                if "A(" not in all_params[job_no][counter]:
-                    index_A[job_no] = counter
-                    counter += 1
-                else:
-                    index_A[job_no] = counter + 1
-                    break
+        #     counter = 0
+        #     while True:
+        #         if "A(" not in all_params[job_no][counter]:
+        #             index_A[job_no] = counter
+        #             counter += 1
+        #         else:
+        #             index_A[job_no] = counter + 1
+        #             break
 
-            counter = 0
-            while True:
-                if "D(" not in all_params[job_no][counter]:
-                    index_D[job_no] = counter
-                    counter += 1
-                else:
-                    index_D[job_no] = counter + 1
-                    break
+        #     counter = 0
+        #     while True:
+        #         if "D(" not in all_params[job_no][counter]:
+        #             index_D[job_no] = counter
+        #             counter += 1
+        #         else:
+        #             index_D[job_no] = counter + 1
+        #             break
 
-        if (bonds == True):
-            bond_list = []
-            params_list = []
-            counter = 1
-            while "R(" in all_params[counter]:
-                params_line = (lines[lines.index(line) + counter].split(" "))
-                params_line = [item.strip(' ') for item in params_line]
-                params_line = [item for item in params_line if item.strip()]
+        # if (bonds == True):
+        #     bond_list = []
+        #     params_list = []
+        #     counter = 1
+        #     while "R(" in all_params[counter]:
+        #         params_line = (lines[lines.index(line) + counter].split(" "))
+        #         params_line = [item.strip(' ') for item in params_line]
+        #         params_line = [item for item in params_line if item.strip()]
 
-                params_list.append(params_line)
-                bleft_index = params_line[2].index("(")
-                bright_index = params_line[2].index(")")
+        #         params_list.append(params_line)
+        #         bleft_index = params_line[2].index("(")
+        #         bright_index = params_line[2].index(")")
 
-                bond_list.append(
-                    params_line[2][bleft_index + 1: bright_index] + "," + params_line[3])
-                counter += 1
+        #         bond_list.append(
+        #             params_line[2][bleft_index + 1: bright_index] + "," + params_line[3])
+        #         counter += 1
 
     # If flag mulliken is true extract mulliken charges from file
     if (mulliken == True):
@@ -331,26 +331,36 @@ def processData(configfile):
 
 
 def assembleOutput(para, mull):
+    
+    concat_mull = []
+    for x in range(len(mull[0])):
+        for y in range(len(mull)):
+            concat_mull.append(mull[y][x])
+    
+    with open("parser_out/output.csv", 'w') as output:
+        writer = csv.writer(output)
 
-    fields = []
-    rows = []
+        for row in concat_mull:
+            writer.writerow(row)
 
-    for job in job_range:
-        if (coords == True):
-            fields.append("Coords")
-            rows.append(job_coords[job])
+    # fields = []
+    # rows = []
+    # for job in job_range:
+    #     if (coords == True):
+    #         fields.append("Coords")
+    #         rows.append(job_coords[job])
 
-        if (bonds == True):
-            fields.append("Bonds")
-            rows.append(job_bonds[job])
+    #     if (bonds == True):
+    #         fields.append("Bonds")
+    #         rows.append(job_bonds[job])
 
-        if (angles == True):
-            fields.append("Angles")
-            rows.append(job_angles[job])
+    #     if (angles == True):
+    #         fields.append("Angles")
+    #         rows.append(job_angles[job])
 
-        if (mulliken == True):
-            fields.appends("Mulliken")
-            rows.append(mull[job])
+    #     if (mulliken == True):
+    #         fields.appends("Mulliken")
+    #         rows.append(mull[job])
 
 
 # Retrieves options and locations from the config and returns arrays with which the rest of the script works
