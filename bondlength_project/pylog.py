@@ -173,14 +173,15 @@ def _cleanArchiveForJob(configfile, job_no):
     split_archive = clean_archive.split("\\")
     split_archive = split_archive[2:]
 
-    # DEBUG PRINTOUT
-    print(split_archive)
-
     return split_archive
 
+### Method that will extract functional, basis set, and coords if coords=true info from the archive
+# TODO: Implementing a function that can distinguish what info belongs to what file is crucial before making this function
+def _getDataFromArchive(_split_archive):
+    pass
+
+
 # Loads tables from config. TODO: Entries removed in filterLogs() have to be removed as well...
-
-
 def _loadParamTables(configfile):
 
     opt_param_start = configfile.index("OPT_PARAMS_START:")
@@ -231,8 +232,6 @@ def _processParamTables(all_params):
         print(dihedrals_list)
 
 # TODO: Using so many counters for iteration is a suboptimal and unreliable solution. I should find a different method.
-
-
 def processData(configfile):
 
     # Loading linenos of appropriate parameter tables
@@ -240,10 +239,13 @@ def processData(configfile):
 
     # For each job (iterated through via counter), access their archive (with linenos from configfile)
     counter = 1
+    all_archives = []
     for line in archive_headers_array:
         filepath = (line.split(":"))[0]
         archive = _cleanArchiveForJob(configfile, counter)
+        all_archives.append(archive)
         counter += 1
+    print(all_archives)
 
     # If flag coords is true then run the pipeline to extract coordinate info from the Optimized Parameters table
     if (bonds == True) or (angles == True) or (dihedrals == True):
@@ -317,7 +319,6 @@ def processData(configfile):
 
     _processParamTables(all_params)
     return all_params, all_mullikens
-
 
 def assembleOutput(para, mull):
 
