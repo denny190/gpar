@@ -6,8 +6,8 @@ import linecache
 
 cwd = os.getcwd()
 
-### TODO: NEED TO IMPLEMENT JOB NUMBERING TO KEEP TRACK OF VARIOUS ARRAYS THAT I NEED TO STITCH TOGETHER IN THE NED
-### JOB NUMBERING WILL LIKELY HAVE SEPARATE TABLES FOR EACH TYPE OF INFO DUE TO VARYING AMOUNT OF ENTRIES PER JOB
+# TODO: NEED TO IMPLEMENT JOB NUMBERING TO KEEP TRACK OF VARIOUS ARRAYS THAT I NEED TO STITCH TOGETHER IN THE NED
+# JOB NUMBERING WILL LIKELY HAVE SEPARATE TABLES FOR EACH TYPE OF INFO DUE TO VARYING AMOUNT OF ENTRIES PER JOB
 
 # Initializing all options and setting them false
 opt = False
@@ -19,6 +19,7 @@ coords = False
 mulliken = False
 bonds = False
 angles = False
+dihedrals = False
 
 # Defining job identification strings
 optString = "FOpt"
@@ -50,6 +51,7 @@ def getConfig(configfile):
     global mulliken
     global bonds
     global angles
+    global dihedrals
 
     options_array = []
 
@@ -78,6 +80,7 @@ def getConfig(configfile):
         bonds = True
     if "angles=true" in options_array:
         angles = True
+        dihedrals = True
 
     return options_array  # CONSIDER REMOVING - RIGHT NOW ONLY DEBUG OUTPUT
 
@@ -191,6 +194,42 @@ def _loadParamTables(configfile):
 
     return opt_param_array, mulliken_param_array
 
+### Method inside _processParamTables()
+def __extract(all_params_array, param_substring):
+    return_array = []
+    for jobno in range(len(all_params_array)):
+        index = next((i for i in enumerate(all_params_array[jobno]) if param_substring in i[1]), [-1, -1])[0]
+        counter = 0
+        param_list = []
+
+        while param_substring in all_params_array[jobno][index + counter]:
+            param_line = (all_params_array[jobno][index + counter]).split(" ")
+            param_line = [item.strip(' ') for item in param_line]
+            param_line = [item for item in param_line if item.strip()]
+
+            bleft_index = param_line[2].index("(")
+            bright_index = param_line[2].index(")")
+            
+            param_list.append(param_line[2][bleft_index + 1: bright_index] + ";" + param_line[3])
+            counter += 1
+            
+        return_array.append(param_list)
+    return return_array
+
+### Method to split optimized parameter tables into their constituent data entries
+def _processParamTables(all_params):
+    if (bonds == True):
+        bonds_list = __extract(all_params, "R(")
+        print(bonds_list)
+                
+    if (angles == True):
+        angles_list = __extract(all_params, "A(")
+        print(angles_list)
+
+    if (dihedrals == True):
+        dihedrals_list = __extract(all_params, "D(")
+        print(dihedrals_list)
+
 # TODO: Using so many counters for iteration is a suboptimal and unreliable solution. I should find a different method.
 
 
@@ -242,56 +281,6 @@ def processData(configfile):
 
             all_params.append(opt_parameters)
 
-        # Getting indices of R, A and D entries in the param table
-        # index_R = []
-        # index_A = []
-        # index_D = []
-        # for line in all_params[job_no]:
-        #     counter = 0
-        #     while True:
-        #         if "R(" not in all_params[job_no][counter]:
-        #             index_R[job_no] = counter
-        #             counter += 1
-        #         else:
-        #             index_R[job_no] = counter + 1
-        #             break
-
-        #     counter = 0
-        #     while True:
-        #         if "A(" not in all_params[job_no][counter]:
-        #             index_A[job_no] = counter
-        #             counter += 1
-        #         else:
-        #             index_A[job_no] = counter + 1
-        #             break
-
-        #     counter = 0
-        #     while True:
-        #         if "D(" not in all_params[job_no][counter]:
-        #             index_D[job_no] = counter
-        #             counter += 1
-        #         else:
-        #             index_D[job_no] = counter + 1
-        #             break
-
-        # if (bonds == True):
-        #     bond_list = []
-        #     params_list = []
-        #     counter = 1
-        #     while "R(" in all_params[counter]:
-        #         params_line = (lines[lines.index(line) + counter].split(" "))
-        #         params_line = [item.strip(' ') for item in params_line]
-        #         params_line = [item for item in params_line if item.strip()]
-
-        #         params_list.append(params_line)
-        #         bleft_index = params_line[2].index("(")
-        #         bright_index = params_line[2].index(")")
-
-        #         bond_list.append(
-        #             params_line[2][bleft_index + 1: bright_index] + "," + params_line[3])
-        #         counter += 1
-
-    # If flag mulliken is true extract mulliken charges from file
     if (mulliken == True):
 
         all_mullikens = []
@@ -326,11 +315,12 @@ def processData(configfile):
             mulliken_charges = [item.strip() for item in mulliken_charges]
             all_mullikens.append(mulliken_charges)
 
+    _processParamTables(all_params)
     return all_params, all_mullikens
 
 
 def assembleOutput(para, mull):
-    
+
     concat_mull = []
     for x in range(len(mull[0])):
         for y in range(len(mull)):
@@ -340,9 +330,9 @@ def assembleOutput(para, mull):
     for x in range(len(para[0])):
         for y in range(len(para)):
             concat_para.append(para[y][x])
-    
-    ### TODO: IMPLEMENT JOB NO TRACKER
-    ### TODO: IMPLEMENT FUNCTION THAT CLEANS UP PARAM ARRAY
+
+    # TODO: IMPLEMENT JOB NO TRACKER
+    # TODO: IMPLEMENT FUNCTION THAT CLEANS UP PARAM ARRAY
     jobno = 3
     with open("parser_out/output.csv", 'w') as output:
         while True:
@@ -350,10 +340,11 @@ def assembleOutput(para, mull):
                 str_to_write = concat_mull[0]
                 for x in range(1, jobno):
                     str_to_write = str_to_write + "," + str(concat_mull[x])
-                output.write(str_to_write + ",\n") 
+                output.write(str_to_write + ",\n")
                 concat_mull = concat_mull[jobno:]
             else:
                 break
+
 
 # Retrieves options and locations from the config and returns arrays with which the rest of the script works
 config_arr = getConfig(runcfg_arr)
