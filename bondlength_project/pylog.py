@@ -3,6 +3,11 @@ import os
 import re
 import sys
 import linecache
+import time
+
+start_time = time.time()
+
+print(">> Python Parser Started")
 
 cwd = os.getcwd()
 
@@ -40,6 +45,7 @@ for line in runconfig:
 
 # Getting options for current run
 
+#################################################################################################################
 
 def getConfig(configfile):
     # Setting option variables as globals so they can be accessed and changed within this function
@@ -82,11 +88,13 @@ def getConfig(configfile):
         angles = True
         dihedrals = True
 
+    print(">> Config Array Loaded:")
+    for elem in options_array:
+        print(elem)
+
     return options_array  # CONSIDER REMOVING - RIGHT NOW ONLY DEBUG OUTPUT
 
 # Filtering archives by job type
-
-
 def filterLogs(configfile):
 
     selected_jobs = []
@@ -121,19 +129,24 @@ def filterLogs(configfile):
             if optString in linecache.getline(file_path, archive_head_index):
                 selected_jobs.append(file_path)
                 found_match = True
+                print(">> Found OPT in %s" % file_path)
 
         elif (freq == True):
             if freqString in linecache.getline(file_path, archive_head_index):
                 selected_jobs.append(file_path)
                 found_match = True
+                print(">> Found FREQ in %s" % file_path)
 
         elif (td == True):
             if tdString in linecache.getline(file_path, archive_head_index):
                 selected_jobs.append(file_path)
                 found_match = True
+                print(">> Found TD in %s" % file_path)
+
 
         # Removes the archive entry from header array and corresponding index in footer array if no match found
         if (found_match == False):
+            print(">> Discarding Archive Entry: %s " % line)
             archive_footers_array.pop(archive_headers_array.index(line))
             archive_headers_array.pop(archive_headers_array.index(line))
 
@@ -159,9 +172,6 @@ def _cleanArchiveForJob(configfile, job_no):
         (configfile[archive_foot_begin + job_no]).split(":"))[1]
     path_to_file = ((configfile[archive_head_begin + job_no]).split(":"))[0]
 
-    # DEBUG PRINTOUT
-    print(job_footer_entry, job_footer_entry)
-
     # Acessing the logfile and loading lines within the range corresponding to the archive file
     job_archive = []
     for x in range(int(job_header_entry), int(job_footer_entry)):
@@ -174,6 +184,18 @@ def _cleanArchiveForJob(configfile, job_no):
     split_archive = split_archive[2:]
 
     return split_archive
+
+def jobTracker(configfile):
+    if (opt == True):
+        pass
+    if (freq == True):
+        pass
+    if (td == True):
+        pass
+    if (scf == True):
+        pass
+    if (coords == True):
+        pass
 
 ### Method that will extract functional, basis set, and coords if coords=true info from the archive
 # TODO: Implementing a function that can distinguish what info belongs to what file is crucial before making this function
@@ -221,15 +243,24 @@ def __extract(all_params_array, param_substring):
 def _processParamTables(all_params):
     if (bonds == True):
         bonds_list = __extract(all_params, "R(")
-        print(bonds_list)
-                
+        for arr in bonds_list:
+            print(">> Bond List from job: %s" % "NA")
+            for elem in arr:
+                print(elem)
+
     if (angles == True):
         angles_list = __extract(all_params, "A(")
-        print(angles_list)
+        for arr in angles_list:
+            print(">> Angle List from job: %s" % "NA")
+            for elem in arr:
+                print(elem)
 
     if (dihedrals == True):
         dihedrals_list = __extract(all_params, "D(")
-        print(dihedrals_list)
+        for arr in dihedrals_list:
+            print(">> Dihedral List from job: %s" % "NA")
+            for elem in arr:
+                print(elem)
 
 # TODO: Using so many counters for iteration is a suboptimal and unreliable solution. I should find a different method.
 def processData(configfile):
@@ -245,7 +276,10 @@ def processData(configfile):
         archive = _cleanArchiveForJob(configfile, counter)
         all_archives.append(archive)
         counter += 1
-    print(all_archives)
+    for arr in all_archives:
+        print(">> Achive from Job: %s" % "NA")
+        for elem in arr:
+            print(elem)
 
     # If flag coords is true then run the pipeline to extract coordinate info from the Optimized Parameters table
     if (bonds == True) or (angles == True) or (dihedrals == True):
@@ -261,7 +295,7 @@ def processData(configfile):
             filepath = linesplit[0]
             param_begin = int(linesplit[1])
 
-            # Use linecache to access the opt_param tabl            print(all_params)e until the end of table is encounetered
+            # Use linecache to access the opt_param tabl print(all_params)e until the end of table is encounetered
             # Counter is set to 4 to skip the header and counter needs to be larger >4 to skip the --- denominator at the beggining of the table
             counter = 4
             while True:
@@ -309,7 +343,7 @@ def processData(configfile):
                     break
 
                 if counter > 1000:
-                    print("ERROR while loading mulliken charges - Python script")
+                    print(">> ERROR while loading mulliken charges")
                     break
 
                 counter += 1
@@ -333,7 +367,6 @@ def assembleOutput(para, mull):
             concat_para.append(para[y][x])
 
     # TODO: IMPLEMENT JOB NO TRACKER
-    # TODO: IMPLEMENT FUNCTION THAT CLEANS UP PARAM ARRAY
     jobno = 3
     with open("parser_out/output.csv", 'w') as output:
         while True:
@@ -346,6 +379,7 @@ def assembleOutput(para, mull):
             else:
                 break
 
+#################################################################################################################
 
 # Retrieves options and locations from the config and returns arrays with which the rest of the script works
 config_arr = getConfig(runcfg_arr)
@@ -360,4 +394,4 @@ all_param_array, all_mulliken_array = processData(runcfg_arr)
 # Assembles the collected data in a user-readable csv output.
 assembleOutput(all_param_array, all_mulliken_array)
 
-# DEBUGPRINTS
+print(">> Python Parser Finished: %s" % (time.time() - start_time))
