@@ -219,7 +219,7 @@ do
 done
 echo "ARCHIVE_FOOTERS_END:" >> $tmp_dir/runconfig.cfg.tmp
 
-if $coords || $angles
+if $bonds || $coords || $angles
 then
     echo "OPT_PARAMS_START:" >> $tmp_dir/runconfig.cfg.tmp
     for f in $(cat $tmp_dir/paths.txt.tmp)
