@@ -1,77 +1,102 @@
 #!/usr/bin/python3
-import os
+
 import re
-import sys
-import linecache
-import time
+import os
 
-#
-start_time = time.time()
-print(">> Python Parser Started")
+def get_job_type(log_file):
+    with open(log_file, 'r') as f:
+        for line in f:
+            match = re.search(r'#\w+\s+(\w+)', line)
+            if match:
+                return match.group(1)
+        return None
+
+def get_functional(log_file):
+    with open(log_file, 'r') as f:
+        for line in f:
+            match = re.search(r'#\w+\s+(\w+)\s*\/', line)
+            if match:
+                return match.group(1)
+        return None
+
+def get_basis_set(log_file):
+    with open(log_file, 'r') as f:
+        for line in f:
+            match = re.search(r'#\w+\s+\w+\s*=\s*(\w+)', line)
+            if match:
+                return match.group(1)
+        return None
+
+def get_optimized_coordinates(log_file):
+    with open(log_file, 'r') as f:
+        coordinate_section = False
+        coordinates = []
+        for line in f:
+            if 'Standard orientation:' in line:
+                coordinate_section = True
+                next(f) # skip the header row
+            elif coordinate_section and len(line.split()) == 6:
+                atom, x, y, z, *_ = line.split()
+                coordinates.append((atom, x, y, z))
+            elif coordinate_section and '-------------------------' in line:
+                coordinate_section = False
+        return coordinates
+
+def get_scf_energies(log_file):
+    with open(log_file, 'r') as f:
+        energies = []
+        for line in f:
+            match = re.search(r'SCF Done:.*\s+(-\d+\.\d+)', line)
+            if match:
+                energies.append(float(match.group(1)))
+        return energies
+
+def get_mulliken_charges(log_file):
+    with open(log_file, 'r') as f:
+        charge_section = False
+        charges = {}
+        for line in f:
+            if 'Mulliken charges:' in line:
+                charge_section = True
+                next(f) # skip the header row
+            elif charge_section and len(line.split()) == 4:
+                atom, _, _, charge = line.split()
+                charges[atom] = float(charge)
+            elif charge_section and 'Sum of Mulliken charges' in line:
+                charge_section = False
+        return charges
+
+def parse_log_files(log_files):
+    results = []
+    for log_file in log_files:
+        job_type = get_job_type(log_file)
+        functional = get_functional(log_file)
+        basis_set = get_basis_set(log_file)
+        optimized_coordinates = get_optimized_coordinates(log_file)
+        scf_energies = get_scf_energies(log_file)
+        mulliken_charges = get_mulliken_charges(log_file)
+        results.append({'file': log_file, 'job_type': job_type, 'functional': functional, 
+                        'basis_set': basis_set, 'optimized_coordinates': optimized_coordinates,
+                        'scf_energies': scf_energies, 'mulliken_charges': mulliken_charges})
+    return results
+
+# Example usage
+
 cwd = os.getcwd()
+path = cwd + "/tmp/paths.txt.tmp"
+logpaths = open(path, 'r')
 
-# Initializing all options
-opt = False 
-freq = False
-td = False
+log_files = []
+for line in logpaths:
+    log_files.append(line.strip())
 
-scf = False
-coords = False
-mulliken = False
-bonds = False
-angles = False
-dihedrals = False
+results = parse_log_files(log_files)
 
-# Opening config file
-path = cwd + "/tmp/runconfig.cfg.tmp"
-config = open(path, 'r')
-
-###
-
-def _splitConfigLine(config_line):
-    file_path = (config_line.split(":"))[0]
-    line_pointer = (config_line.split(":"))[1]
-
-###
-def LoadConfig(configfile):
-    
-    global opt, freq, td, scf, coords, mulliken, bonds, angles, dihedrals
-    
-    if "opt=true" in configfile:
-        opt = True
-    if "freq=true" in configfile:
-        freq = True
-    if "td=true" in configfile:
-        td = True
-
-    if "scf=true" in configfile:
-        scf = True 
-    if "coords=true" in configfile:
-        coords = True
-    if "mulliken=true" in configfile:
-        mulliken = True
-    if "bonds=true" in configfile:
-        bonds = True
-    if "angles=true" in configfile:
-        angles = True
-        dihedrals = True
-
-
-### 
-LoadConfig(config)
-
-LoadArchive()
-
-if (coords == True):
-    ExtractCoords()
-
-if (bonds == True) or (angles == True) or (dihedrals == True):
-    ExtractParams()
-
-if (mulliken == True):
-    ExtractMulliken()
-
-if (scf == True):
-    ExtractSCF  
-
-assembleOutput()
+for result in results:
+    print(f'File: {result["file"]}')
+    print(f'Job type: {result["job_type"]}')
+    print(f'Functional: {result["functional"]}')
+    print(f'Basis set: {result["basis_set"]}')
+    print(f'SCF Energies: {result["scf_energies"]}')
+    print(f'Optimized Coordinates {result["optimized_coordinates"]}')
+          
