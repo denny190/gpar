@@ -60,3 +60,23 @@ def extract_mulliken_charges(logfile_path, start_line):
     return mulliken_charges
 
 ###
+
+## TEST ENTRIES:
+
+# Archive Entries
+# Start: ../logfiles/03_s1_opt.log:1027947
+# End: ../logfiles/03_s1_opt.log:1027971
+arch_file_path = "../logfiles/03_s1_opt.log"
+arch_line_no = 1027947
+
+# Mulliken Charges
+# Start: ../logfiles/03_s1_opt.log:1027730
+mull_file_path = "../logfiles/03_s1_opt.log"
+mull_line_no = 1027730
+
+# Opt Params
+# Start: ../logfiles/03_s1_opt.log:1027054
+
+# SCF
+
+###
