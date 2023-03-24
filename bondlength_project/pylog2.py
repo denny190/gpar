@@ -57,16 +57,22 @@ def extract_mulliken_charges(filepath, line_num):
 def extract_params(filepath, line_num):
    
     all_params = []
+
     with open(filepath) as f:
         current_line_no = line_num
         while True:
             current_line = linecache.getline(current_line_no)
-            if "---" in current_line and current_line_no > (line_num + 4):
+            if "--------------------------------------------------------------------------------" in current_line and current_line_no > (line_num + 4):
                 break
             else:
                 all_params.append(current_line)
                 current_line_no += 1
-            
+    
+    bonds_list = _extract_value_type(all_params, "R(")
+    angles_list = _extract_value_type(all_params, "A(")
+    dihedrals_list = _extract_value_type(all_params, "D(")
+    
+
 def _extract_value_type(all_params, value_type):
     pass
 
