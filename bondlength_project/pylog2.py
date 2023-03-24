@@ -67,7 +67,8 @@ def extract_params(filepath, line_num):
                 all_params.append(current_line)
                 current_line_no += 1
             
-
+def _extract_value_type(all_params, value_type):
+    pass
 
 
 ###
@@ -88,7 +89,7 @@ mull_line_no = 1027730
 # Opt Params
 # Start: ../logfiles/03_s1_opt.log:1027054
 optparam_file_path = "../logfiles/03_s1_opt.log"
-optparam_line_no = "1027054"
+optparam_line_no = 1027054
 
 # SCF
 
