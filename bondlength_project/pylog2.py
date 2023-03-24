@@ -54,6 +54,22 @@ def extract_mulliken_charges(filepath, line_num):
                 break  # We found the table, stop parsing
     return charges
 
+def extract_params(filepath, line_num):
+   
+    all_params = []
+    with open(filepath) as f:
+        current_line_no = line_num
+        while True:
+            current_line = linecache.getline(current_line_no)
+            if "---" in current_line and current_line_no > (line_num + 4):
+                break
+            else:
+                all_params.append(current_line)
+                current_line_no += 1
+            
+
+
+
 ###
 
 ## TEST ENTRIES:
@@ -71,6 +87,8 @@ mull_line_no = 1027730
 
 # Opt Params
 # Start: ../logfiles/03_s1_opt.log:1027054
+optparam_file_path = "../logfiles/03_s1_opt.log"
+optparam_line_no = "1027054"
 
 # SCF
 
