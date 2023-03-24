@@ -20,44 +20,39 @@ for line in runconfig:
 def extract_job_archive(logfile_path, start_line, job_types):
     job_archive = []
     current_line = start_line
+    # check if the start line contains any of the job types
+    if any(job_type in linecache.getline(logfile_path, start_line) for job_type in job_types):
     # read the job archive line by line
-    while True:
-        line = linecache.getline(logfile_path, current_line).strip()
-        # check if the line contains any of the job types
-        if any(job_type in line for job_type in job_types):
+        while True:
+            line = linecache.getline(logfile_path, current_line).strip()
+            # check if the line contains any of the job types
             job_archive.append(line)
             # if the line ends with a backslash, continue to the next line
-            if line.endswith("\\"):
-                current_line += 1
-                continue
+            if "\\@" in line:
+                break
             # if the line doesn't end with a backslash, we've reached the end of the job archive
             else:
-                break
-        current_line += 1
+                current_line += 1
+                continue
+    
+    ### clean up of archive to a nice list
+    job_archive = ''.join(job_archive)
+    job_archive = job_archive.split("\\")
+        
     return job_archive
 
-def extract_mulliken_charges(logfile_path, start_line):
-    mulliken_charges = []
-    current_line = start_line
-    while True:
-        line = linecache.getline(logfile_path, current_line)
-        # check if the line contains Mulliken charges
-        if "Mulliken charges:" in line:
-            # read the next line to get the atomic numbers
-            atomic_nums_line = linecache.getline(logfile_path, current_line + 1)
-            atomic_nums = [int(x) for x in atomic_nums_line.split()]
-            # read the following lines to get the charges
-            charges = []
-            for i in range(len(atomic_nums)):
-                charge_line = linecache.getline(logfile_path, current_line + 2 + i)
-                charges.append(float(charge_line.split()[-1]))
-            # combine the atomic numbers and charges into a list of tuples
-            mulliken_charges += list(zip(atomic_nums, charges))
-        current_line += 1
-        # check if we've reached the end of the file
-        if line == '':
-            break
-    return mulliken_charges
+def extract_mulliken_charges(filepath, line_num):
+    charges = []
+    with open(filepath) as f:
+        for i, line in enumerate(f):
+            if i == line_num:
+                for line in f:
+                    if " Sum " in line:
+                        break
+                    atom_num, atom_type, atom_charge = line.split()
+                    charges.append([atom_num, atom_type, atom_charge])
+                break  # We found the table, stop parsing
+    return charges
 
 ###
 
@@ -80,3 +75,9 @@ mull_line_no = 1027730
 # SCF
 
 ###
+
+test_archive = extract_job_archive(arch_file_path, arch_line_no, "opt")
+for line in test_archive: print(line)
+
+test_mulliken = extract_mulliken_charges(mull_file_path, mull_line_no)
+for line in test_mulliken: print(line)
