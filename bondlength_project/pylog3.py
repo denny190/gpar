@@ -1,89 +1,10 @@
-#!/usr/bin/python3
-
-import argparse
-import os
 import re
 import sys
+import argparse
 from datetime import datetime
+import numpy as np
 
-def get_job_type(log_file):
-    with open(log_file, 'r') as f:
-        for line in f:
-            match = re.search(r'#\w+\s+(\w+)', line)
-            if match:
-                return match.group(1)
-        return None
 
-def get_functional(log_file):
-    with open(log_file, 'r') as f:
-        for line in f:
-            match = re.search(r'#\w+\s+(\w+)\s*\/', line)
-            if match:
-                return match.group(1)
-        return None
-
-def get_basis_set(log_file):
-    with open(log_file, 'r') as f:
-        for line in f:
-            match = re.search(r'#\w+\s+\w+\s*=\s*(\w+)', line)
-            if match:
-                return match.group(1)
-        return None
-
-def get_optimized_coordinates(log_file):
-    with open(log_file, 'r') as f:
-        coordinate_section = False
-        coordinates = []
-        for line in f:
-            if 'Standard orientation:' in line:
-                coordinate_section = True
-                next(f) # skip the header row
-            elif coordinate_section and len(line.split()) == 6:
-                atom, x, y, z, *_ = line.split()
-                coordinates.append((atom, x, y, z))
-            elif coordinate_section and '-------------------------' in line:
-                coordinate_section = False
-        return coordinates
-
-def get_scf_energies(log_file):
-    with open(log_file, 'r') as f:
-        energies = []
-        for line in f:
-            match = re.search(r'SCF Done:.*\s+(-\d+\.\d+)', line)
-            if match:
-                energies.append(float(match.group(1)))
-        return energies
-
-def get_mulliken_charges(log_file):
-    with open(log_file, 'r') as f:
-        charge_section = False
-        charges = {}
-        for line in f:
-            if 'Mulliken charges:' in line:
-                charge_section = True
-                next(f) # skip the header row
-            elif charge_section and len(line.split()) == 4:
-                atom, _, _, charge = line.split()
-                charges[atom] = float(charge)
-            elif charge_section and 'Sum of Mulliken charges' in line:
-                charge_section = False
-        return charges
-
-def parse_log_files(log_files):
-    results = []
-    for log_file in log_files:
-        job_type = get_job_type(log_file)
-        functional = get_functional(log_file)
-        basis_set = get_basis_set(log_file)
-        optimized_coordinates = get_optimized_coordinates(log_file)
-        scf_energies = get_scf_energies(log_file)
-        mulliken_charges = get_mulliken_charges(log_file)
-        results.append({'file': log_file, 'job_type': job_type, 'functional': functional, 
-                        'basis_set': basis_set, 'optimized_coordinates': optimized_coordinates,
-                        'scf_energies': scf_energies, 'mulliken_charges': mulliken_charges})
-    return results
-
-###
 def isfloat(value):
     try:
         float(value)
@@ -181,22 +102,24 @@ def parse(infile):
                                 while (len(line.split()) > 3 or not line.replace(' ', '').isdigit()):
                                     symm = symm + line.split()
                                     freq += next(logfile).strip().split()[2:]
-                                    red_mass += next(logfile).strip().split()[3:]
-                                    force_const += next(logfile).strip().split()[3:]
-                                    ir_inten += next(logfile).strip().split()[3:]
+                                    red_mass += next(
+                                        logfile).strip().split()[3:]
+                                    force_const += next(
+                                        logfile).strip().split()[3:]
+                                    ir_inten += next(
+                                        logfile).strip().split()[3:]
                                     line = next(logfile)
 
                                     modes = []
                                     line = next(logfile).strip()
                                     while len(line.split()) > 3:
-                                        modes.append(list(map(float, line.split())))
+                                        modes.append(line.split())
                                         line = next(logfile).strip()
-                                        
-                                    parsed['nm_atom_order'] = [int(mode[1]) for mode in modes]
-
-                                    modes = [mode[2:] for mode in modes]
-                                    nmodes += [modes[i:i + 3] for i in range(0, len(modes), 3)]
-
+                                    modes = np.array(modes).astype(np.float)
+                                    parsed['nm_atom_order'] = modes[:,
+                                                                    1].astype(np.int).tolist()
+                                    modes = np.hsplit(modes[:, 2:], 3)
+                                    nmodes += [mode.tolist() for mode in modes]
                                     freq_parsed += line.split()
                                     if not line:
                                         break
@@ -260,9 +183,7 @@ def parse(infile):
                         next(logfile)
                         line = next(logfile).strip()
                         parsed['tddft']['excited_states'] = []
-                        
                         while line.startswith('Excited State'):
-                            break
                             venergy = float(line.split()[4])
                             osc_strength = float(line.split()[8][2:])
                             total_energy = None
@@ -272,19 +193,11 @@ def parse(infile):
                             while (line.split() and line.split()[0].isdigit()):
                                 contrib = line.split()
                                 del contrib[1]
-                                
-                                if len(contrib) >= 3:
-                                    contrib = [
-                                        int(float(i)) for i in contrib[:2]] + [float(contrib[2])]
-                                    contribs.append(contrib)
-                                    print(contrib)
-                                else:
-                                    # Handle the case when there are not enough elements in contrib.
-                                    # You can add a custom error message or skip the current iteration.
-                                    #print(f"Warning: not enough elements in line: {line}")
-                                    continue
-
+                                contrib = [
+                                    int(i) for i in contrib[:2]] + [float(contrib[2])]
+                                contribs.append(contrib)
                                 line = next(logfile).strip()
+
                             root_match = regexes['tddft_root_info'].search(
                                 line)
                             while root_match:
@@ -332,30 +245,23 @@ def parse(infile):
         parsed['end'] = {'normal': False}
 
     return parsed
-###
 
 
-# Example usage
+def output(outputfile, parsed):
+    print(parsed)
 
-cwd = os.getcwd()
-path = cwd + "/tmp/paths.txt.tmp"
-logpaths = open(path, 'r')
 
-log_files = ["../logfiles/03_s1_opt.log", "../logfiles/01_lum_s0_opt.log"]
-#for line in logpaths:
-#    log_files.append(line.strip())
+def main():
+    args_parser = argparse.ArgumentParser(
+        description='Process Gaussian 16 output files.')
+    args_parser.add_argument('--file', '-f', type=argparse.FileType('r'))
+    args_parser.add_argument('--output', '-o', type=argparse.FileType('w'))
 
-#results = parse_log_files(log_files)
-#
-#for result in results:
-#    print(f'File: {result["file"]}')
-#    print(f'Job type: {result["job_type"]}')
-#    print(f'Functional: {result["functional"]}')
-#    print(f'Basis set: {result["basis_set"]}')
-#    print(f'SCF Energies: {result["scf_energies"]}')
-#    print(f'Optimized Coordinates {result["optimized_coordinates"]}')
+    args = args_parser.parse_args()
+    parsed = parse(args.file)
+    output(args.output, parsed)
 
-for file in log_files:
-    with open(file, 'r') as logfile:
-        print(parse(logfile))
-    
+
+if __name__ == '__main__':
+    main()
+
