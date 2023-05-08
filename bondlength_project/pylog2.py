@@ -6,6 +6,20 @@ import re
 import sys
 from datetime import datetime
 
+def print_dict(dictionary, indent=0):
+    for key, value in dictionary.items():
+        if isinstance(value, dict):
+            print(' ' * indent + str(key) + ':')
+            print_dict(value, indent + 4)
+        elif isinstance(value, list):
+            print(' ' * indent + str(key) + ':')
+            for item in value:
+                if isinstance(item, dict):
+                    print_dict(item, indent + 4)
+                else:
+                    print(' ' * (indent + 4) + str(item))
+        else:
+            print(' ' * indent + str(key) + ': ' + str(value))
 
 ###
 def isfloat(value):
@@ -188,7 +202,6 @@ def parse(infile):
                         parsed['tddft']['excited_states'] = []
                         
                         while line.startswith('Excited State'):
-                            break
                             venergy = float(line.split()[4])
                             osc_strength = float(line.split()[8][2:])
                             total_energy = None
@@ -196,6 +209,7 @@ def parse(infile):
 
                             line = next(logfile).strip()
                             while (line.split() and line.split()[0].isdigit()):
+                                break
                                 print(line)
                                 contrib = line.split()
                                 del contrib[1]
@@ -271,5 +285,7 @@ for line in logpaths:
 
 for file in log_files:
     with open(file, 'r') as logfile:
-        print(parse(logfile))
-    
+         #print(parse(logfile))
+         print_dict(parse(logfile))
+        
+
