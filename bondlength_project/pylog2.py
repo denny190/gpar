@@ -52,6 +52,7 @@ def parse(infile):
         for line in logfile:
             line = line.strip()
 
+            #TODO: Implement option passing from .sh script HERE
             re_order = ['version', 'chk', 'route', 'input',
                         'hfenergy', 'opt', 'freq', 'hessian', 'tddft', 'force', 'end']
 
@@ -126,7 +127,8 @@ def parse(infile):
                                     force_const += next(logfile).strip().split()[3:]
                                     ir_inten += next(logfile).strip().split()[3:]
                                     line = next(logfile)
-
+                                    
+                                    ###TODO: Fix Normal Modes!
                                     modes = []
                                     line = next(logfile).strip()
                                     while len(line.split()) > 3:
@@ -209,6 +211,7 @@ def parse(infile):
 
                             line = next(logfile).strip()
                             while (line.split() and line.split()[0].isdigit()):
+                                #TODO: Fix Excited States!
                                 break
                                 print(line)
                                 contrib = line.split()
@@ -285,7 +288,7 @@ for line in logpaths:
 
 for file in log_files:
     with open(file, 'r') as logfile:
-         #print(parse(logfile))
-         print_dict(parse(logfile))
+        print(parse(logfile))
+        #print_dict(parse(logfile))
         
 
