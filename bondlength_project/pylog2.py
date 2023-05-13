@@ -44,7 +44,7 @@ def parse(infile):
         'opt': re.compile(r'Stationary point found.'),
         'force': re.compile(r'Center     Atomic                   Forces'),
         'cpu_time': re.compile(r'^Job cpu time:'),
-        'end': re.compile(r'(?:Normal termination of Gaussian \d+ at )(.*)\.')
+        'termination': re.compile(r'(?:Normal termination of Gaussian \d+ at )(.*)\.')
     }
 
     parsed = {'type': 'g16'}
@@ -53,21 +53,20 @@ def parse(infile):
             line = line.strip()
 
             #TODO: Implement option passing from .sh script HERE
-            re_order = ['version', 'chk', 'route', 'input',
-                        'hfenergy', 'opt', 'freq', 'hessian', 'tddft', 'force', 'end']
+            re_order = ['version', 'chk', 'route', 'input','hfenergy', 'opt', 'freq', 'hessian', 'tddft', 'force', 'termination']
 
             for regex in re_order:
                 try:
-                    m = regexes[regex].search(line)
+                    match = regexes[regex].search(line)
                 except KeyError as e:
                     print('Key', e, 'not found in list of regular expressions.')
                     raise
-                if m:
+                if match:
                     if regex == 'version':
                         parsed['version'] = next(
                             logfile).strip().replace(',', '')
                     elif regex == 'chk':
-                        parsed['chk'] = m.group(1).replace('.chk', '') + '.chk'
+                        parsed['chk'] = match.group(1).replace('.chk', '') + '.chk'
                     elif regex == 'route':
                         parsed['route'] = [line[1:].strip()]
                         try:
@@ -157,7 +156,7 @@ def parse(infile):
                     elif regex == 'hessian':
                         parsed['hessian'] = parsed.setdefault('hessian', {})
 
-                        if m.group(1):
+                        if match.group(1):
                             line = next(logfile).strip()
                             raw_matrix = []
                             while not line.startswith('ITU='):
@@ -258,9 +257,9 @@ def parse(infile):
                         parsed['cpu_time'] = float(cpu_time[0])*24*60*60 + \
                             float(cpu_time[2])*60*60 + \
                             float(cpu_time[4])*60 + float(cpu_time[8])
-                    elif regex == 'end':
-                        parsed['end'] = {'normal': True,
-                                         'time': datetime.strptime(' '.join(m.group(1).split()),
+                    elif regex == 'termination':
+                        parsed['termination'] = {'normal': True,
+                                         'time': datetime.strptime(' '.join(match.group(1).split()),
                                                                    '%a %b %d %H:%M:%S %Y')}
 
                     break
@@ -269,8 +268,8 @@ def parse(infile):
             del parsed['opt']
     except KeyError:
         pass
-    if 'end' not in parsed:
-        parsed['end'] = {'normal': False}
+    if 'termination' not in parsed:
+        parsed['termination'] = {'normal': False}
 
     return parsed
 ###
