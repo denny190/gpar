@@ -117,7 +117,7 @@ def parse(infile):
                         if freq:
                             while line.split():
                                 freq_parsed = line.split()
-                                symm, freq, red_mass, force_const, ir_inten, nmodes = [], [], [], [], [], []
+                                symm, freq, red_mass, force_const, ir_inten, raman_act, depolar_P, depolar_U, nmodes = [], [], [], [], [], [], [], [], []
                                 line = next(logfile).strip()
                                 while (len(line.split()) > 3 or not line.replace(' ', '').isdigit()):
                                     symm = symm + line.split()
@@ -125,7 +125,10 @@ def parse(infile):
                                     red_mass += next(logfile).strip().split()[3:]
                                     force_const += next(logfile).strip().split()[3:]
                                     ir_inten += next(logfile).strip().split()[3:]
-                                    line = next(logfile)
+                                    raman_act += next(logfile).strip().split()[3:]
+                                    depolar_P += next(logfile).strip().split()[3:]
+                                    depolar_U += next(logfile).strip().split()[3:]
+                                    line = next(logfile).strip()
                                     
                                     ###TODO: Fix Normal Modes!
                                     modes = []
@@ -151,6 +154,7 @@ def parse(infile):
                                         'reduced_mass': float(red_mass[mode]),
                                         'force_constant': float(force_const[mode]),
                                         'ir_intensity': float(ir_inten[mode]),
+                                        'raman_activity': float(raman_act[mode]),
                                         'mode': nmodes[mode]
                                     }
                     elif regex == 'hessian':
@@ -287,7 +291,8 @@ for line in logpaths:
 
 for file in log_files:
     with open(file, 'r') as logfile:
-        print(parse(logfile))
+        parse(logfile)
+        #print(parse(logfile))
         #print_dict(parse(logfile))
         
 
