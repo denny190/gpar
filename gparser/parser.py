@@ -43,7 +43,7 @@ def parse(infile):
         'opt': re.compile(r'Stationary point found.'),
         'force': re.compile(r'Center     Atomic                   Forces'),
         'cpu_time': re.compile(r'^Job cpu time:'),
-        'termination': re.compile(r'(Normal termination of Gaussian \d+ at )(.*)\.')
+        'termination': re.compile(r'Normal termination of Gaussian \d+ at (.*)\.')
     }
 
     parsed = {'type': 'g16'}
@@ -54,7 +54,6 @@ def parse(infile):
 
             #TODO: Implement option passing from .sh script HERE
             re_order = ['version', 'chk', 'input', 'archive', 'hfenergy', 'opt', 'force', 'termination']
-            #re_order = ['archive']
 
             for regex in re_order:
                 try:
@@ -90,7 +89,6 @@ def parse(infile):
                         #List comprehensions to remove bulky DipoleDeriv= and PolarDeriv= printouts that clutter the final output
                         clean_archive = [x for x in clean_archive if "DipoleDeriv=" not in x and "PolarDeriv=" not in x and len(x) <= 1000]
 
-                        #print(clean_archive)
                         parsed['archive'] = clean_archive
 
                     elif regex == 'input':
@@ -214,7 +212,7 @@ def parse(infile):
 # Example usage
 
 cwd = os.getcwd()
-path = cwd + "/tmp/paths.txt.tmp"
+path = cwd + "/paths.txt.tmp"
 logpaths = open(path, 'r')
 
 log_files = []
@@ -223,7 +221,7 @@ for line in logpaths:
 
 for file in log_files:
     with open(file, 'r') as logfile:
-        parse(logfile)
+        #parse(logfile)
         #print(parse(logfile))
-        #print_dict(parse(logfile))
+        print_dict(parse(logfile))
         
