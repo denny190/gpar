@@ -35,6 +35,8 @@ def parse(infile):
         'version': re.compile(r'Cite this work as:'),
         'chk': re.compile(r'^%chk=(\S+)'),
         'archive': re.compile(r'^1\\1'),
+         #'geometry': re.compile(r''), #BONDS, ANGLES AND DIHEDRALS
+         #'mulliken':
         'hfenergy': re.compile(r'^SCF Done:'),
         'input': re.compile(r'^Symbolic Z-matrix:'),
         'freq': re.compile(r'^Harmonic frequencies \(cm\*\*-1\)'),
@@ -73,17 +75,22 @@ def parse(infile):
                         archive_array.append(line[1:].strip())
                         try:
                             line = next(logfile).strip()
-                            while line[0:3] != '---':
+                            while True:
                                 archive_array.append(line.strip())
+                                if '@' in line:
+                                    break
                                 line = next(logfile).strip()
-                                
-                                #TODO: Filter out DipoleDeriv= and PolarDeriv= from archive as the output is unnecessarily large and useless
-                                
+                                                                
                         except StopIteration:
                             pass
                         
                         joined_archive = ''.join(archive_array)
                         clean_archive = joined_archive.split("\\")
+                        
+                        #List comprehensions to remove bulky DipoleDeriv= and PolarDeriv= printouts that clutter the final output
+                        clean_archive = [x for x in clean_archive if "DipoleDeriv=" not in x and "PolarDeriv=" not in x and len(x) <= 1000]
+
+                        #print(clean_archive)
                         parsed['archive'] = clean_archive
 
                     elif regex == 'input':
@@ -186,8 +193,6 @@ def parse(infile):
                             float(cpu_time[4])*60 + float(cpu_time[8])
                         
                     elif regex == 'termination':
-                        print("DEBUG TERMINATION!!!!!!!!!!!!!!!!!!!!!!!!!")
-                        print("TERMINATION" + line)
                         parsed['termination'] = {'normal': True,
                                          'time': datetime.strptime(' '.join(match.group(1).split()),
                                                                    '%a %b %d %H:%M:%S %Y')}
@@ -202,7 +207,6 @@ def parse(infile):
 
     if 'termination' not in parsed:
         parsed['termination'] = {'normal': False}
-
     return parsed
 ###
 
@@ -223,4 +227,3 @@ for file in log_files:
         #print(parse(logfile))
         #print_dict(parse(logfile))
         
-
