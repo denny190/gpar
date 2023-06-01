@@ -6,7 +6,7 @@ import re
 import sys
 from datetime import datetime
 
-print_order = ['type', 'version', 'chk', 'input', 'archive', 'hfenergy', 'opt', 'force', 'termination']
+print_order = ['type', 'version', 'chk', 'input', 'archive', 'mulliken', 'hfenergy', 'opt', 'force', 'termination']
 
 def print_dict(dictionary, indent=1, order=print_order):
     if order is not None:
@@ -45,7 +45,7 @@ def parse(infile):
         'chk': re.compile(r'^%chk=(\S+)'),
         'archive': re.compile(r'^1\\1'),
          #'geometry': re.compile(r''), #BONDS, ANGLES AND DIHEDRALS
-         #'mulliken':
+        'mulliken': re.compile(r'Mulliken charges:'),
         'hfenergy': re.compile(r'^SCF Done:'),
         'input': re.compile(r'^Symbolic Z-matrix:'),
         'freq': re.compile(r'^Harmonic frequencies \(cm\*\*-1\)'),
@@ -62,7 +62,7 @@ def parse(infile):
             line = line.strip()
 
             #TODO: Implement option passing from .sh script HERE
-            re_order = ['version', 'chk', 'input', 'archive', 'hfenergy', 'opt', 'force', 'termination']
+            re_order = ['version', 'chk', 'input', 'archive', 'mulliken_all', 'mulliken_heavy', 'hfenergy', 'opt', 'force', 'termination']
 
             for regex in re_order:
                 try:
@@ -102,6 +102,20 @@ def parse(infile):
                             parsed['archive'] = parsed['archive'] + clean_archive
                         except:
                             parsed['archive'] = clean_archive
+
+                    elif regex == 'geometry':
+                        pass
+
+                    elif regex == 'mulliken':
+                        mulliken_array = []
+                        while True:
+                            if "Sum of Mulliken charges =" in line:
+                                mulliken_array.append(line)
+                                break
+                            else:
+                                mulliken_array.append(line)
+                            line = next(logfile).strip()
+                        parsed['mulliken'] = mulliken_array
 
                     elif regex == 'input':
                         line = next(logfile).strip()
@@ -194,10 +208,7 @@ def parse(infile):
                         while line[0:3] != '---':
                             parsed['force'].append([int(i) for i in line.split()[
                                                    0:2]] + [float(i) for i in line.split()[2:]])
-                            line = next(logfile).strip()#
-
-                    elif regex == 'mulliken':
-                        pass
+                            line = next(logfile).strip()
 
                     elif regex == 'cpu_time':
                         cpu_time = line.split()[3:]
