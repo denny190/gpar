@@ -62,7 +62,7 @@ def parse(infile):
             line = line.strip()
 
             #TODO: Implement option passing from .sh script HERE
-            re_order = ['version', 'chk', 'input', 'archive', 'mulliken_all', 'mulliken_heavy', 'hfenergy', 'opt', 'force', 'termination']
+            re_order = ['version', 'chk', 'input', 'archive', 'mulliken', 'hfenergy', 'opt', 'force', 'termination']
 
             for regex in re_order:
                 try:
