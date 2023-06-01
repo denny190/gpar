@@ -6,20 +6,29 @@ import re
 import sys
 from datetime import datetime
 
-def print_dict(dictionary, indent=0):
-    for key, value in dictionary.items():
+print_order = ['type', 'version', 'chk', 'input', 'archive', 'hfenergy', 'opt', 'force', 'termination']
+
+def print_dict(dictionary, indent=1, order=print_order):
+    if order is not None:
+        sorted_keys = sorted(dictionary.keys(), key=lambda x: order.index(x) if x in order else len(order))
+    else:
+        sorted_keys = dictionary.keys()
+
+    for key in sorted_keys:
+        value = dictionary[key]
         if isinstance(value, dict):
             print(' ' * indent + str(key) + ':')
-            print_dict(value, indent + 4)
+            print_dict(value, indent + 4, order)
         elif isinstance(value, list):
             print(' ' * indent + str(key) + ':')
             for item in value:
                 if isinstance(item, dict):
-                    print_dict(item, indent + 4)
+                    print_dict(item, indent + 4, order)
                 else:
                     print(' ' * (indent + 4) + str(item))
         else:
             print(' ' * indent + str(key) + ': ' + str(value))
+
 
 ###
 def isfloat(value):
@@ -89,7 +98,10 @@ def parse(infile):
                         #List comprehensions to remove bulky DipoleDeriv= and PolarDeriv= printouts that clutter the final output
                         clean_archive = [x for x in clean_archive if "DipoleDeriv=" not in x and "PolarDeriv=" not in x and len(x) <= 1000]
 
-                        parsed['archive'] = clean_archive
+                        try:
+                            parsed['archive'] = parsed['archive'] + clean_archive
+                        except:
+                            parsed['archive'] = clean_archive
 
                     elif regex == 'input':
                         line = next(logfile).strip()
@@ -103,7 +115,7 @@ def parse(infile):
                             line = next(logfile).strip()
 
                     elif regex == 'hfenergy':
-                        parsed['energy'] = float(line.split()[4])
+                        parsed['hfenergy'] = float(line.split()[4])
 
                     elif regex == 'opt':
                         parsed['opt'] = {'success': True, 'geom': []}
@@ -182,7 +194,10 @@ def parse(infile):
                         while line[0:3] != '---':
                             parsed['force'].append([int(i) for i in line.split()[
                                                    0:2]] + [float(i) for i in line.split()[2:]])
-                            line = next(logfile).strip()
+                            line = next(logfile).strip()#
+
+                    elif regex == 'mulliken':
+                        pass
 
                     elif regex == 'cpu_time':
                         cpu_time = line.split()[3:]
@@ -205,12 +220,11 @@ def parse(infile):
 
     if 'termination' not in parsed:
         parsed['termination'] = {'normal': False}
+    
     return parsed
 ###
 
-
 # Example usage
-
 cwd = os.getcwd()
 path = cwd + "/paths.txt.tmp"
 logpaths = open(path, 'r')
@@ -220,6 +234,8 @@ for line in logpaths:
     log_files.append(line.strip())
 
 for file in log_files:
+    print("############################################\n" + file + "\n############################################")
+
     with open(file, 'r') as logfile:
         #parse(logfile)
         #print(parse(logfile))
